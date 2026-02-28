@@ -1,0 +1,7 @@
+epochs: 50
+batch_size: 16
+image_size: 640
+model: yolov8n.pt
+device: auto
+project_name: "NeonGuardian_Traffic"
+save_period: 5

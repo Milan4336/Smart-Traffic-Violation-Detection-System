@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, Search, BellRing, ChevronRight } from 'lucide-react';
+import { Shield, BellRing, ChevronRight, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { socket } from '../socket';
 
 export const Header: React.FC = () => {
     const [version, setVersion] = useState<string>('v1.0.0');
     const [updateAvailable, setUpdateAvailable] = useState<boolean>(false);
     const [pendingUpdate, setPendingUpdate] = useState<any>(null);
+    const { logout } = useAuth();
 
     useEffect(() => {
         // Fetch current version
@@ -13,8 +15,9 @@ export const Header: React.FC = () => {
             try {
                 // Hardcoding localhost:5000 for local dev if reverse proxy fails, otherwise handle via env
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const token = localStorage.getItem('token'); // Prepare for Auth implementation
-                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                const token = localStorage.getItem('token');
+                const headers: Record<string, string> = {};
+                if (token) headers['Authorization'] = `Bearer ${token}`;
 
                 const res = await fetch(`${apiUrl}/system/version/latest`, { headers });
                 if (res.ok) {
@@ -89,6 +92,16 @@ export const Header: React.FC = () => {
                             backgroundImage: 'url("https://ui-avatars.com/api/?name=A+Vance&background=0D8ABC&color=fff")'
                         }}
                     ></div>
+                    <button
+                        onClick={logout}
+                        className="p-2 ml-2 text-slate-400 hover:text-alert transition-colors group relative"
+                        title="TERMINATE SESSION"
+                    >
+                        <LogOut className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_#FF4C4C]" />
+                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] font-mono whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            TERMINATE SESSION
+                        </span>
+                    </button>
                 </div>
             </div>
         </header>

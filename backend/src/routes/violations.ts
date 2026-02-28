@@ -91,7 +91,7 @@ router.patch('/:id/status', authenticateToken, requireClearance(2), async (req: 
         const { status } = req.body; // 'verified', 'rejected', 'dispatched'
 
         const violation = await prisma.violation.update({
-            where: { id },
+            where: { id: id as string },
             data: {
                 status,
                 verifiedBy: req.user!.id,
@@ -106,7 +106,7 @@ router.patch('/:id/status', authenticateToken, requireClearance(2), async (req: 
                 userId: req.user!.id,
                 action: 'UPDATE_STATUS',
                 entity: 'Violation',
-                entityId: id,
+                entityId: id as string,
             }
         });
 

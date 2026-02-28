@@ -1,0 +1,13 @@
+path: /home/milan/Neon_Guardian/ai-training/datasets
+train: images/train
+val: images/val
+test: images/test
+
+nc: 6
+names:
+  - car
+  - motorcycle
+  - helmet
+  - license_plate
+  - traffic_light
+  - person

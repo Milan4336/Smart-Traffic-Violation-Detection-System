@@ -14,6 +14,7 @@ import camerasRouter from './routes/cameras';
 import analyticsRouter from './routes/analytics';
 import systemRouter from './routes/system';
 import updatesRouter from './routes/updates';
+import videosRouter from './routes/videos';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/api/cameras', camerasRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/system', systemRouter);
 app.use('/api/updates', updatesRouter);
+app.use('/api/videos', videosRouter);
 
 // Initialize Socket.IO & Redis
 initSocket(server);

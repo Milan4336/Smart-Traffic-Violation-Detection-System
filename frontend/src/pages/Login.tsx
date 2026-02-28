@@ -60,22 +60,39 @@ export const Login: React.FC = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background-dark text-white p-4">
-            <div className="max-w-md w-full glass-panel p-8 rounded-lg relative overflow-hidden scanline-effect border border-primary/20 shadow-[0_0_30px_rgba(0,240,255,0.15)]">
-                <div className="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+        <div className="flex items-center justify-center min-h-screen bg-background-dark text-white p-4 relative overflow-hidden">
+            {/* Background Narrative Animation */}
+            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+                <div className="grid grid-cols-12 gap-4 h-full w-full p-4 overflow-hidden">
+                    {Array.from({ length: 24 }).map((_, i) => (
+                        <div key={i} className="flex flex-col gap-2 animate-pulse" style={{ animationDelay: `${i * 150}ms`, opacity: Math.random() }}>
+                            {Array.from({ length: 20 }).map((_, j) => (
+                                <div key={j} className="h-1 w-full bg-primary/20 rounded"></div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="max-w-md w-full glass-panel p-8 rounded-lg relative z-10 overflow-hidden scanline-effect border border-primary/20 shadow-[0_0_50px_rgba(0,240,255,0.2)]">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent shadow-[0_0_15px_#00F0FF]"></div>
+
                 <div className="flex flex-col items-center mb-8">
-                    <div className="size-16 rounded-full border border-primary flex items-center justify-center mb-4 bg-primary/10 shadow-[0_0_15px_rgba(0,255,163,0.3)]">
-                        <Shield className="w-8 h-8 text-primary" />
+                    <div className="size-20 rounded-full border border-primary/50 flex items-center justify-center mb-4 bg-primary/5 shadow-[0_0_20px_rgba(0,240,255,0.2)] relative">
+                        <div className="absolute inset-0 border border-primary rounded-full animate-ping opacity-20"></div>
+                        <Shield className="w-10 h-10 text-primary drop-shadow-[0_0_8px_#00F0FF]" />
                     </div>
-                    <h2 className="text-3xl font-display font-bold tracking-widest text-center">NEON <span className="text-primary">GUARDIAN</span></h2>
-                    <p className="text-slate-400 font-mono text-xs uppercase tracking-widest mt-2">Level 4 Clearance Required</p>
+                    <h2 className="text-4xl font-display font-bold tracking-[0.2em] text-center">NEON <span className="text-primary">GUARDIAN</span></h2>
+                    <div className="h-0.5 w-24 bg-primary/30 mt-2"></div>
+                    <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.4em] mt-3">PROPRIETARY SURVEILLANCE NODE</p>
                 </div>
 
                 {error && (
-                    <div className="border border-alert bg-alert/10 text-alert p-3 mb-6 rounded text-sm font-mono text-center animate-pulse">
-                        ACCESS DENIED: {error}
+                    <div className="border border-alert bg-alert/5 text-alert p-3 mb-6 rounded text-[10px] font-mono text-center animate-shake uppercase tracking-tighter">
+                        CRITICAL ERROR: {error}
                     </div>
-                )}
+                )/* Rest of logic... */}
 
                 {isAuthenticating ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-6 min-h-[300px]">

@@ -19,6 +19,7 @@ model User {
   lastLogin       DateTime?
   auditLogs       AuditLog[]
   verifiedViolations Violation[] @relation("VerifiedBy")
+  uploadedVideos  UploadedVideo[]
 }
 
 model Violation {
@@ -75,7 +76,7 @@ model AuditLog {
   action    String
   entity    String
   entityId  String
-  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
 }
@@ -119,7 +120,7 @@ model SystemChangelog {
   oldValue       String?
   newValue       String?
   changedBy      String
-  timestamp      DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   version        SystemVersion? @relation(fields: [versionId], references: [id])
 }
@@ -130,4 +131,31 @@ model SystemMetadata {
   lastUpdated    DateTime @default(now())
   environment    String   @default("production")
   buildNumber    Int      @default(1)
+}
+
+model UploadedVideo {
+  id              String   @id @default(uuid())
+  uploadedBy      String
+  filePath        String
+  status          String   @default("queued") // queued, processing, completed, failed
+  durationSeconds Float?
+  uploadedAt      DateTime @default(now())
+  processedAt     DateTime?
+
+  user            User     @relation(fields: [uploadedBy], references: [id])
+  violations      VideoViolation[]
+}
+
+model VideoViolation {
+  id                 String   @id @default(uuid())
+  videoId            String
+  violationType      String
+  confidenceScore    Float
+  frameTimestamp     Float
+  plateNumber        String?
+  boundingBox        Json?
+  evidenceImagePath  String?
+  createdAt          DateTime @default(now())
+
+  video              UploadedVideo @relation(fields: [videoId], references: [id])
 }

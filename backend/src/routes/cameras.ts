@@ -72,7 +72,7 @@ router.post('/register', authenticateToken, requireClearance(4), async (req: Aut
 router.post('/:id/heartbeat', async (req: Request, res: Response): Promise<any> => {
     try {
         const camera = await prisma.camera.update({
-            where: { id: req.params.id },
+            where: { id: req.params.id as string },
             data: {
                 lastHeartbeat: new Date(),
                 status: 'ONLINE',
@@ -89,7 +89,7 @@ router.post('/:id/heartbeat', async (req: Request, res: Response): Promise<any> 
 // GET /api/cameras/:id
 router.get('/:id', authenticateToken, async (req: Request, res: Response): Promise<any> => {
     try {
-        const camera = await prisma.camera.findUnique({ where: { id: req.params.id } });
+        const camera = await prisma.camera.findUnique({ where: { id: req.params.id as string } });
         if (!camera) return res.status(404).json({ error: 'Camera not found' });
         res.json(camera);
     } catch (error) {

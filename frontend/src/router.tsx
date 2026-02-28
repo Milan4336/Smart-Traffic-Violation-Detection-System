@@ -9,6 +9,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Grid } from './pages/Grid';
 import { Logs } from './pages/Logs';
 import { Stats } from './pages/Stats';
+import { VideoUpload } from './pages/VideoUpload';
+import { VideoDetails } from './pages/VideoDetails';
 
 export const router = createBrowserRouter([
     {
@@ -42,6 +44,14 @@ export const router = createBrowserRouter([
                     {
                         path: 'analytics',
                         element: <Stats />,
+                    },
+                    {
+                        path: 'videos',
+                        element: <VideoUpload />,
+                    },
+                    {
+                        path: 'videos/:id',
+                        element: <VideoDetails />,
                     },
                     {
                         path: 'system',

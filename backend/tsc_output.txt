@@ -1,0 +1,19 @@
+src/routes/cameras.ts(75,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/cameras.ts(92,66): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/updates.ts(9,38): error TS2339: Property 'systemUpdate' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/routes/updates.ts(20,26): error TS2339: Property 'systemUpdate' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/routes/updates.ts(21,42): error TS2339: Property 'systemUpdate' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/routes/videos.ts(103,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/videos.ts(138,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/videos.ts(163,17): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/videos.ts(174,72): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/violations.ts(94,22): error TS2322: Type 'string | string[]' is not assignable to type 'string | undefined'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/violations.ts(109,17): error TS2322: Type 'string | string[]' is not assignable to type 'string'.
+  Type 'string[]' is not assignable to type 'string'.

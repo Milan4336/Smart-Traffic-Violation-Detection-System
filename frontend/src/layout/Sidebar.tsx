@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Map, Table, LineChart, Settings } from 'lucide-react';
+import { LayoutDashboard, Map, Table, LineChart, Settings, Video } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const Sidebar: React.FC = () => {
@@ -8,6 +8,7 @@ export const Sidebar: React.FC = () => {
         { name: 'CMD', icon: LayoutDashboard, path: '/' },
         { name: 'GRID', icon: Map, path: '/live-monitoring' },
         { name: 'LOGS', icon: Table, path: '/violations' },
+        { name: 'VIDEO', icon: Video, path: '/videos' },
         { name: 'STATS', icon: LineChart, path: '/analytics' },
         { name: 'PATCHES', icon: Settings, path: '/system' },
     ];
