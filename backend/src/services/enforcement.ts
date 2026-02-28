@@ -68,3 +68,66 @@ export const updateOrCreateVehicle = async (prisma: any, plateNumber: string) =>
         });
     }
 };
+
+/**
+ * Logic to automatically generate alerts based on violation severity/risk
+ */
+export const createAlertIfNeeded = async (prisma: any, violation: any, vehicle: any): Promise<any> => {
+    try {
+        let alertType: 'CRITICAL' | 'HIGH' | 'MEDIUM' | null = null;
+
+        // 1. Critical Type Logic
+        if (
+            violation.type === 'WRONG_WAY' ||
+            vehicle?.isBlacklisted ||
+            vehicle?.riskLevel === 'CRITICAL'
+        ) {
+            alertType = 'CRITICAL';
+        }
+        // 2. High Priority Logic
+        else if (
+            (violation.confidenceScore >= 95) &&
+            (vehicle?.riskLevel === 'HIGH' || vehicle?.riskLevel === 'MEDIUM')
+        ) {
+            alertType = 'HIGH';
+        }
+        // 3. Medium Priority Logic
+        else if (vehicle?.totalViolations >= 5) {
+            alertType = 'MEDIUM';
+        }
+
+        if (alertType) {
+            const alert = await prisma.alert.create({
+                data: {
+                    violationId: violation.id,
+                    cameraId: violation.cameraId,
+                    plateNumber: violation.plateNumber,
+                    alertType,
+                    status: 'ACTIVE'
+                }
+            });
+
+            // Publish to Redis for WebSocket broadcast
+            const { redisPublisher } = require('../redis');
+            if (redisPublisher) {
+                await redisPublisher.publish('alert:new', JSON.stringify({
+                    id: alert.id,
+                    violationId: violation.id,
+                    cameraId: alert.cameraId,
+                    plateNumber: alert.plateNumber,
+                    type: violation.type,
+                    alertType: alert.alertType,
+                    timestamp: alert.createdAt
+                }));
+            }
+
+            console.log(`[ALERT] Created ${alertType} alert for ${violation.plateNumber}`);
+            return alert;
+        }
+
+        return null;
+    } catch (error) {
+        console.error("Failed to create alert:", error);
+        return null;
+    }
+};

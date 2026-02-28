@@ -71,15 +71,18 @@ model Camera {
 }
 
 model Alert {
-  id            String    @id @default(uuid())
-  violationId   String
-  severity      String    // LOW, MEDIUM, HIGH, CRITICAL
-  dispatchedTo  String?
-  dispatchedAt  DateTime?
-  resolvedAt    DateTime?
-  createdAt     DateTime  @default(now())
+  id             String    @id @default(uuid())
+  violationId    String
+  cameraId       String?
+  plateNumber    String?
+  alertType      String    // CRITICAL, HIGH, MEDIUM
+  status         String    @default("ACTIVE") // ACTIVE, ACKNOWLEDGED, RESOLVED
+  
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
 
-  violation     Violation @relation(fields: [violationId], references: [id])
+  violation      Violation @relation(fields: [violationId], references: [id])
 }
 
 model AuditLog {
@@ -182,6 +185,7 @@ model Vehicle {
   plateNumber      String   @unique
   totalViolations  Int      @default(0)
   riskLevel        String   @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+  isBlacklisted    Boolean  @default(false)
   lastViolationAt  DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

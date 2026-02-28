@@ -16,6 +16,7 @@ import systemRouter from './routes/system';
 import updatesRouter from './routes/updates';
 import videosRouter from './routes/videos';
 import vehiclesRouter from './routes/vehicles';
+import alertsRouter from './routes/alerts';
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ app.use('/api/system', systemRouter);
 app.use('/api/updates', updatesRouter);
 app.use('/api/videos', videosRouter);
 app.use('/api/vehicles', vehiclesRouter);
+app.use('/api/alerts', alertsRouter);
 
 // Initialize Socket.IO & Redis
 initSocket(server);

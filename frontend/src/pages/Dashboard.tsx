@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { ViolationCard } from '../components/cards/ViolationCard';
-import { ShieldAlert, Cpu, Video, Activity, Globe } from 'lucide-react';
+import { ShieldAlert, Cpu, Video, Activity, Globe, Bell, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { socket } from '../socket';
 import { LiveMap } from '../components/LiveMap';
+import { AlertPopup } from '../components/AlertPopup';
 
 export const AnalyticsCard: React.FC<{
     title: string;
@@ -59,6 +60,8 @@ export const Dashboard: React.FC = () => {
     const [analytics, setAnalytics] = useState({ totalViolations: 0, todayViolations: 0, activeCameras: 0, avgConfidence: 0 });
     const [cameraStatus, setCameraStatus] = useState({ online_cameras: 0, offline_cameras: 0, health: 'UNKNOWN' });
     const [cameras, setCameras] = useState<any[]>([]);
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [activePopupAlert, setActivePopupAlert] = useState<any>(null);
     const [recentViolations, setRecentViolations] = useState<any[]>([]);
     const [liveAlerts, setLiveAlerts] = useState<any[]>([]);
     const [selectedFine, setSelectedFine] = useState<any>(null);
@@ -69,20 +72,22 @@ export const Dashboard: React.FC = () => {
             const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
 
             try {
-                const [analyticsRes, camStatusRes, violationsRes, camerasRes] = await Promise.all([
+                const [analyticsRes, camStatusRes, violationsRes, camerasRes, alertsRes] = await Promise.all([
                     fetch(`${apiUrl}/analytics`, { headers }),
                     fetch(`${apiUrl}/cameras/status`, { headers }),
-                    fetch(`${apiUrl}/violations?limit=2`, { headers }), // 2 for recent verifications list
-                    fetch(`${apiUrl}/cameras`, { headers }) // 2 for recent verifications list
+                    fetch(`${apiUrl}/violations?limit=2`, { headers }),
+                    fetch(`${apiUrl}/cameras`, { headers }),
+                    fetch(`${apiUrl}/alerts`, { headers })
                 ]);
 
                 if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
                 if (camStatusRes.ok) setCameraStatus(await camStatusRes.json());
                 if (camerasRes.ok) setCameras(await camerasRes.json());
+                if (alertsRes.ok) setAlerts(await alertsRes.json());
                 if (violationsRes.ok) {
                     const data = await violationsRes.json();
                     setRecentViolations(data.data || []);
-                    setLiveAlerts(data.data || []); // prefill alerts
+                    setLiveAlerts(data.data || []);
                 }
             } catch (err) {
                 console.error("Dashboard DB Sync Error", err);
@@ -100,7 +105,7 @@ export const Dashboard: React.FC = () => {
                 totalViolations: prev.totalViolations + 1
             }));
 
-            setLiveAlerts(prev => [violation, ...prev].slice(0, 10)); // Keep top 10
+            setLiveAlerts(prev => [violation, ...prev].slice(0, 10));
             setRecentViolations(prev => [violation, ...prev].slice(0, 5));
         });
 
@@ -125,10 +130,22 @@ export const Dashboard: React.FC = () => {
             setCameras(prev => prev.map(c => c.id === cam.id ? { ...c, healthStatus: 'HEALTHY', status: 'ONLINE' } : c));
         });
 
+        socket.on('alert:new', (data) => {
+            const alert = typeof data === 'string' ? JSON.parse(data) : data;
+            setAlerts(prev => [alert, ...prev]);
+            if (alert.alertType === 'CRITICAL' || alert.alertType === 'HIGH') {
+                setActivePopupAlert(alert);
+            }
+        });
+
+        socket.on('alert:status_change', (data) => {
+            const update = typeof data === 'string' ? JSON.parse(data) : data;
+            setAlerts(prev => prev.map(a => a.id === update.id ? { ...a, status: update.status } : a));
+        });
+
         socket.on('fine:generated', (data) => {
             const fineData = typeof data === 'string' ? JSON.parse(data) : data;
             console.log("Fine Generated:", fineData);
-            // Optional: update existing alert with fine
             setLiveAlerts(prev => prev.map(a => a.id === fineData.violationId ? { ...a, fineAmount: fineData.fineAmount, fineStatus: 'pending' } : a));
             setRecentViolations(prev => prev.map(v => v.id === fineData.violationId ? { ...v, fineAmount: fineData.fineAmount, fineStatus: 'pending' } : v));
         });
@@ -136,9 +153,47 @@ export const Dashboard: React.FC = () => {
         return () => {
             socket.off('violation:new');
             socket.off('camera:offline');
+            socket.off('camera:degraded');
+            socket.off('camera:recovered');
+            socket.off('alert:new');
+            socket.off('alert:status_change');
             socket.off('fine:generated');
         };
     }, []);
+
+    const handleAcknowledgeAlert = async (id: string) => {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        try {
+            await fetch(`${apiUrl}/alerts/${id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ status: 'ACKNOWLEDGED' })
+            });
+            if (activePopupAlert?.id === id) setActivePopupAlert(null);
+        } catch (err) {
+            console.error("Failed to acknowledge alert", err);
+        }
+    };
+
+    const handleResolveAlert = async (id: string) => {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        try {
+            await fetch(`${apiUrl}/alerts/${id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ status: 'RESOLVED' })
+            });
+            setAlerts(prev => prev.filter(a => a.id !== id));
+        } catch (err) {
+            console.error("Failed to resolve alert", err);
+        }
+    };
 
     return (
         <div className="h-full grid grid-cols-12 gap-6 p-6 overflow-hidden relative">
@@ -316,53 +371,90 @@ export const Dashboard: React.FC = () => {
                 </div>
             </section>
 
-            {/* Right Column: Alert Ticker (3 Cols) */}
-            <section className="col-span-3 flex flex-col h-full gap-4">
-                <h2 className="font-display font-bold text-lg text-white/80 uppercase tracking-widest flex items-center gap-2">
-                    <ShieldAlert className="text-alert w-4 h-4" /> LIVE INTELLIGENCE
-                </h2>
-                <div className="flex-1 glass-panel rounded-lg overflow-hidden flex flex-col">
-                    <div className="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center">
-                        <span className="text-xs font-mono text-slate-400">FEED STATUS</span>
+            {/* Right Column: Live Alerts & intelligence (3 Cols) */}
+            <section className="col-span-3 flex flex-col h-full gap-4 overflow-hidden">
+                <div className="h-1/2 glass-panel rounded-lg overflow-hidden flex flex-col border-alert/20">
+                    <div className="p-3 border-b border-white/10 bg-alert/5 flex justify-between items-center">
+                        <h3 className="text-xs font-display font-bold text-alert flex items-center gap-2 uppercase tracking-tight">
+                            <ShieldAlert className="w-3.5 h-3.5" /> Command Alerts
+                        </h3>
                         <div className="flex items-center gap-1.5">
-                            <span className="size-1.5 rounded-full bg-success animate-pulse"></span>
-                            <span className="text-[10px] font-bold text-success tracking-wider">LIVE DATA</span>
+                            <span className="size-1.5 rounded-full bg-alert animate-pulse"></span>
+                            <span className="text-[10px] font-bold text-alert tracking-wider">LIVE</span>
                         </div>
                     </div>
                     <div className="flex-1 overflow-y-auto p-2 space-y-2 relative">
-                        {liveAlerts.map((alert: any, idx: number) => (
-                            <div key={idx} className="animate-pulse-border bg-alert/10 border border-alert/50 p-3 rounded relative overflow-hidden group hover:bg-alert/20 transition-colors cursor-pointer">
-                                <div className="absolute top-0 right-0 p-1">
-                                    <ShieldAlert className="text-alert w-4 h-4" />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-mono text-alert font-bold border border-alert/30 px-1 rounded">CRITICAL</span>
-                                        <span className="text-[10px] font-mono text-slate-300">{new Date(alert.createdAt || Date.now()).toLocaleTimeString()}</span>
+                        {alerts.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-slate-600 font-mono text-[10px] opacity-40">
+                                <Bell className="w-8 h-8 mb-2" />
+                                NO ACTIVE THREATS
+                            </div>
+                        ) : (
+                            alerts.map((alert: any, idx: number) => (
+                                <div key={idx} className={clsx(
+                                    "p-3 rounded border font-mono text-[10px] transition-all relative overflow-hidden group",
+                                    alert.status === 'ACTIVE' ? "bg-alert/10 border-alert/40 animate-pulse-border" : "bg-white/5 border-white/10 opacity-70"
+                                )}>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className={clsx(
+                                            "px-1.5 py-0.5 rounded text-[8px] font-bold uppercase",
+                                            alert.alertType === 'CRITICAL' ? "bg-alert text-white" : "bg-warning text-background-dark"
+                                        )}>
+                                            {alert.alertType}
+                                        </span>
+                                        <span className="text-slate-500">{new Date(alert.createdAt || Date.now()).toLocaleTimeString()}</span>
                                     </div>
-                                    <h4 className="text-sm font-bold text-white font-display mb-1">{alert.type.replace('_', ' ')}</h4>
-                                    <p className="text-xs text-slate-400 mb-1 truncate">Node ID: {alert.cameraId} | Threat: {Number(alert.threatScore || 0).toFixed(0)}</p>
-                                    {alert.fineAmount && (
-                                        <p className="text-xs font-bold text-warning mb-2">
-                                            ESTIMATED FINE: ₹{alert.fineAmount.toLocaleString()}
-                                        </p>
-                                    )}
+                                    <div className="text-white font-bold text-xs mb-1">
+                                        {alert.plateNumber} — {alert.type?.replace('_', ' ')}
+                                    </div>
+                                    <div className="text-[9px] text-slate-400 mb-2">NODE: {alert.cameraId}</div>
 
-                                    {alert.evidenceImageUrl && (
-                                        <div className="w-full h-16 bg-black border border-slate-700/50 rounded mb-2 overflow-hidden">
-                                            <img src={`http://localhost:5000${alert.evidenceImageUrl}`} className="w-full h-full object-cover" alt="Evidence" />
-                                        </div>
-                                    )}
-
-                                    <div className="mt-1 flex gap-2">
-                                        <Button variant="alert" size="sm" className="flex-1">Dispatch</Button>
+                                    <div className="flex gap-2 mt-2">
+                                        {alert.status === 'ACTIVE' ? (
+                                            <button
+                                                onClick={() => handleAcknowledgeAlert(alert.id)}
+                                                className="flex-1 bg-white/10 hover:bg-white/20 py-1.5 rounded border border-white/10 transition-colors uppercase font-bold text-[8px]"
+                                            >
+                                                Acknowledge
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleResolveAlert(alert.id)}
+                                                className="flex-1 bg-success/20 hover:bg-success/30 text-success py-1.5 rounded border border-success/30 transition-colors uppercase font-bold text-[8px]"
+                                            >
+                                                Resolve
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex-1 glass-panel rounded-lg overflow-hidden flex flex-col border-primary/20">
+                    <div className="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center">
+                        <h3 className="text-xs font-display font-bold text-primary flex items-center gap-2 uppercase tracking-widest">
+                            <Activity className="w-3.5 h-3.5" /> System Logs
+                        </h3>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-3 space-y-3 font-mono text-[10px]">
+                        <div className="text-success animate-pulse mb-2">SYSTEM_STABLE: OPERATIONAL</div>
+                        {liveAlerts.slice(0, 10).map((v, i) => (
+                            <div key={i} className="border-l border-white/10 pl-3 py-1 text-slate-400 whitespace-pre-wrap">
+                                <span className="text-primary opacity-50">[{new Date(v.createdAt).toLocaleTimeString()}]</span> REPORT_{v.type} DETECTED ON NODE_{v.cameraId}. CONF_{Math.floor(v.confidenceScore)}%
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
+            {activePopupAlert && (
+                <AlertPopup
+                    alert={activePopupAlert}
+                    onClose={() => setActivePopupAlert(null)}
+                    onAcknowledge={handleAcknowledgeAlert}
+                />
+            )}
         </div>
     );
 };

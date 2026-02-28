@@ -5,7 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { authenticateToken, requireClearance, AuthRequest } from '../middleware/auth';
-import { updateOrCreateVehicle, calculateFine } from '../services/enforcement';
+import { updateOrCreateVehicle, calculateFine, createAlertIfNeeded } from '../services/enforcement';
 
 const router = Router();
 
@@ -112,6 +112,9 @@ router.post('/', upload.single('evidenceImage'), async (req: Request, res: Respo
             fineAmount,
             plateNumber
         }));
+
+        // Feature 3: Critical alerts
+        await createAlertIfNeeded(prisma, updatedViolation, vehicle);
 
         res.status(201).json(enrichedViolation);
     } catch (error) {

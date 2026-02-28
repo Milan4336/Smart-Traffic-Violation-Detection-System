@@ -40,12 +40,27 @@ export const initRedisSubscriber = async () => {
     await subscriber.connect();
     console.log('Redis connected for Pub/Sub');
 
-    const topics = ['violation:new', 'violation:verified', 'camera:offline', 'alert:critical'];
+    const topics = [
+        'violation:new',
+        'violation:verified',
+        'camera:offline',
+        'camera:degraded',
+        'camera:recovered',
+        'alert:new',
+        'alert:status_change',
+        'fine:generated'
+    ];
 
     for (const topic of topics) {
         await subscriber.subscribe(topic, (message) => {
-            console.log(`Broadcasting [${topic}]:`, message);
-            getIO().emit(topic, JSON.parse(message));
+            console.log(`Broadcasting [${topic}]`);
+            try {
+                const payload = typeof message === 'string' ? JSON.parse(message) : message;
+                getIO().emit(topic, payload);
+            } catch (e) {
+                // If it's already an object or raw string that's not JSON
+                getIO().emit(topic, message);
+            }
         });
     }
 };
