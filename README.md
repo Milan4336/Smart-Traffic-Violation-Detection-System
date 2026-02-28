@@ -6,6 +6,12 @@ Neon Guardian is an advanced AI-powered traffic monitoring and violation detecti
 
 - **Real-Time Monitoring**: Live RTSP stream ingestion with overlayed AI detections.
 - **Automated Violation Detection**: Identifies Red Light, Wrong Way, No Helmet, Triple Riding, and License Plate data.
+- **Repeat Offender Tracking (V1.1)**: Automatic tracking of license plates with dynamic risk level escalation.
+- **Automated Fine Calculation (V1.1)**: Dynamic levy determination based on offense severity and multipliers.
+- **Camera Health Monitoring (V1.2)**: Real-time tracking of node uptime, latency, and FPS with degraded state alerts.
+- **Critical Alert System (V1.2)**: High-severity popup overrides for blacklisted vehicles and critical violations.
+- **Violation Evidence Viewer (V1.3)**: High-precision frame-accurate video playback with bounding box overlays for legal audits.
+- **Vehicle Intelligence Profile (V1.3)**: Deep-dive behavioral dossiers with Recharts analytics and localized Leaflet maps.
 - **Enterprise Video Scanner**: Upload MP4/AVI/MOV files for delayed batch processing with interactive timeline review.
 - **AI Training Pipeline**: Integrated workspace to train, validate, and export custom YOLOv8 models for traffic specific classes.
 - **System Updates Tracker**: Comprehensive patch notes and version management with real-time WebSocket notifications.
