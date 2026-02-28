@@ -17,19 +17,15 @@ export interface ViolationCardProps {
         riskLevel: string;
     } | null;
     onClick?: () => void;
+    onPlateClick?: () => void;
 }
 
 export const ViolationCard: React.FC<ViolationCardProps> = ({
-    plate, type, confidence, time, cameraId, status = 'pending', vehicle, fineAmount, fineStatus, onClick
+    plate, type, confidence, status = 'pending', vehicle, fineAmount, fineStatus, onClick, onPlateClick
 }) => {
     const isRepeatOffender = vehicle && vehicle.totalViolations >= 3;
 
-    const riskColors: Record<string, string> = {
-        'LOW': 'text-success border-success/30 bg-success/5',
-        'MEDIUM': 'text-warning border-warning/30 bg-warning/5',
-        'HIGH': 'text-alert border-alert/30 bg-alert/5',
-        'CRITICAL': 'text-purple-500 border-purple-500/30 bg-purple-500/5'
-    };
+
     return (
         <div
             onClick={onClick}
@@ -44,7 +40,17 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
                 </div>
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-primary group-hover:text-white">{plate}</span>
+                        <span
+                            className="text-xs font-mono text-primary hover:text-white hover:underline cursor-pointer"
+                            onClick={(e) => {
+                                if (onPlateClick) {
+                                    e.stopPropagation();
+                                    onPlateClick();
+                                }
+                            }}
+                        >
+                            {plate}
+                        </span>
                         {isRepeatOffender && (
                             <span className="text-[8px] font-bold bg-alert/20 text-alert px-1 border border-alert/30 rounded animate-pulse">
                                 REPEAT OFFENDER

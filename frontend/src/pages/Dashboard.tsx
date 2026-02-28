@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ViolationCard } from '../components/cards/ViolationCard';
 import { ShieldAlert, Cpu, Video, Activity, Globe, Bell } from 'lucide-react';
@@ -58,6 +59,7 @@ export const AnalyticsCard: React.FC<{
 };
 
 export const Dashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [analytics, setAnalytics] = useState({ totalViolations: 0, todayViolations: 0, activeCameras: 0, avgConfidence: 0 });
     const [cameraStatus, setCameraStatus] = useState({ online_cameras: 0, offline_cameras: 0, health: 'UNKNOWN' });
     const [cameras, setCameras] = useState<any[]>([]);
@@ -245,6 +247,7 @@ export const Dashboard: React.FC = () => {
                                 fineAmount={v.fineAmount}
                                 fineStatus={v.fineStatus}
                                 onClick={() => setSelectedViolationId(v.id)}
+                                onPlateClick={() => navigate(`/vehicles/${v.plateNumber}`)}
                             />
                         ))}
                     </div>
@@ -401,7 +404,12 @@ export const Dashboard: React.FC = () => {
                                         <span className="text-slate-500">{new Date(alert.createdAt || Date.now()).toLocaleTimeString()}</span>
                                     </div>
                                     <div className="text-white font-bold text-xs mb-1">
-                                        {alert.plateNumber} — {alert.type?.replace('_', ' ')}
+                                        <span
+                                            className="hover:text-primary hover:underline cursor-pointer"
+                                            onClick={() => navigate(`/vehicles/${alert.plateNumber}`)}
+                                        >
+                                            {alert.plateNumber}
+                                        </span> — {alert.type?.replace('_', ' ')}
                                     </div>
                                     <div className="text-[9px] text-slate-400 mb-2">NODE: {alert.cameraId}</div>
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Table, ShieldAlert, Filter, Download } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 
 export const Logs: React.FC = () => {
+    const navigate = useNavigate();
     const [violations, setViolations] = useState<any[]>([]);
 
     useEffect(() => {
@@ -63,7 +65,12 @@ export const Logs: React.FC = () => {
                                     {new Date(v.createdAt).toLocaleString()}
                                 </td>
                                 <td className="p-4 text-sm font-mono font-bold text-white tracking-widest">
-                                    {v.plateNumber || 'N/A'}
+                                    <span
+                                        className="text-primary hover:text-white hover:underline cursor-pointer"
+                                        onClick={() => navigate(`/vehicles/${v.plateNumber}`)}
+                                    >
+                                        {v.plateNumber || 'N/A'}
+                                    </span>
                                 </td>
                                 <td className="p-4 text-sm font-display font-bold">
                                     <span className="text-alert bg-alert/10 px-2 py-1 rounded border border-alert/20 flex items-center gap-2 w-max">

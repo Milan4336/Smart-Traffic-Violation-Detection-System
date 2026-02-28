@@ -11,6 +11,7 @@ import { Logs } from './pages/Logs';
 import { Stats } from './pages/Stats';
 import { VideoUpload } from './pages/VideoUpload';
 import { VideoDetails } from './pages/VideoDetails';
+import { VehicleProfile } from './pages/VehicleProfile';
 
 export const router = createBrowserRouter([
     {
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
                     {
                         path: 'system',
                         element: <Updates />,
+                    },
+                    {
+                        path: 'vehicles/:plateNumber',
+                        element: <VehicleProfile />,
                     },
                     {
                         path: 'admin/system-updates',
