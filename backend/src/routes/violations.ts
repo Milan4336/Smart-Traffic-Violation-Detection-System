@@ -5,7 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { authenticateToken, requireClearance, AuthRequest } from '../middleware/auth';
-import { updateOrCreateVehicle } from '../services/enforcement';
+import { updateOrCreateVehicle, calculateFine } from '../services/enforcement';
 
 const router = Router();
 
@@ -33,7 +33,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
 
         const whereClause = status ? { status } : {};
 
-        const violations = await prisma.violation.findMany({
+        const violations = await (prisma as any).violation.findMany({
             where: whereClause,
             orderBy: { createdAt: 'desc' },
             take: limit,
@@ -44,7 +44,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
             }
         });
 
-        const total = await prisma.violation.count({ where: whereClause });
+        const total = await (prisma as any).violation.count({ where: whereClause });
 
         res.json({ data: violations, total, page, limit });
     } catch (error) {
@@ -63,7 +63,7 @@ router.post('/', upload.single('evidenceImage'), async (req: Request, res: Respo
             evidenceImageUrl = `/uploads/evidence/${req.file.filename}`;
         }
 
-        const violation = await prisma.violation.create({
+        const violation = await (prisma as any).violation.create({
             data: {
                 type,
                 plateNumber,
@@ -79,18 +79,39 @@ router.post('/', upload.single('evidenceImage'), async (req: Request, res: Respo
         });
 
         // Feature 1: Repeat Offender Detection
+        let vehicle = null;
         if (plateNumber) {
-            await updateOrCreateVehicle(prisma, plateNumber);
+            vehicle = await updateOrCreateVehicle(prisma, plateNumber);
         }
 
-        // Re-fetch to include updated vehicle stats if needed, or just broadcast the violation
-        const enrichedViolation = await prisma.violation.findUnique({
+        // Feature 2: Automatic Fine Calculation
+        const fineAmount = await calculateFine(prisma, type, vehicle?.totalViolations || 0);
+
+        // Update violation with fine info
+        const updatedViolation = await (prisma as any).violation.update({
+            where: { id: violation.id },
+            data: {
+                fineAmount,
+                fineStatus: 'pending',
+                fineGeneratedAt: new Date()
+            }
+        });
+
+        // Re-fetch to include all relations for the broadcast
+        const enrichedViolation = await (prisma as any).violation.findUnique({
             where: { id: violation.id },
             include: { camera: true, vehicle: true }
         });
 
         // Publish event to Redis for real-time dashboard updates
         await redisPublisher.publish('violation:new', JSON.stringify(enrichedViolation));
+
+        // Emit fine generated event
+        await redisPublisher.publish('fine:generated', JSON.stringify({
+            violationId: violation.id,
+            fineAmount,
+            plateNumber
+        }));
 
         res.status(201).json(enrichedViolation);
     } catch (error) {
@@ -131,6 +152,52 @@ router.patch('/:id/status', authenticateToken, requireClearance(2), async (req: 
         res.json(violation);
     } catch (error) {
         res.status(500).json({ error: 'Failed to update violation status' });
+    }
+});
+
+// GET /api/violations/:id/fine - Get fine calculation details
+router.get('/:id/fine', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const { id } = req.params;
+        const violation = await (prisma as any).violation.findUnique({
+            where: { id: id as string },
+            include: { vehicle: true }
+        });
+
+        if (!violation) {
+            return res.status(404).json({ error: 'Violation not found' });
+        }
+
+        // Fetch the rule used for calculation
+        const rule = await (prisma as any).violationFineRule.findUnique({
+            where: { violationType: violation.type }
+        }) || await (prisma as any).violationFineRule.findUnique({
+            where: { violationType: violation.type.toUpperCase() }
+        });
+
+        const vehicleCount = violation.vehicle?.totalViolations || 0;
+        const multiplier = rule?.repeatMultiplier || 1.0;
+        let appliedMultiplier = 1.0;
+
+        if (vehicleCount >= 10) appliedMultiplier = multiplier * 1.5;
+        else if (vehicleCount >= 3) appliedMultiplier = multiplier;
+
+        res.json({
+            fineAmount: violation.fineAmount,
+            fineStatus: violation.fineStatus,
+            fineGeneratedAt: violation.fineGeneratedAt,
+            violationType: violation.type,
+            plateNumber: violation.plateNumber,
+            calculation: {
+                baseAmount: rule?.baseAmount || 0,
+                repeatMultiplier: multiplier,
+                appliedMultiplier,
+                vehicleViolationCount: vehicleCount,
+                riskLevel: violation.vehicle?.riskLevel || 'LOW'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch fine details' });
     }
 });
 

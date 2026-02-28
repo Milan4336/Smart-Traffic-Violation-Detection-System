@@ -9,7 +9,7 @@ router.get('/:plate_number', authenticateToken, async (req: Request, res: Respon
     try {
         const { plate_number } = req.params;
 
-        const vehicle = await prisma.vehicle.findUnique({
+        const vehicle = await (prisma as any).vehicle.findUnique({
             where: { plateNumber: plate_number },
             include: {
                 violations: {

@@ -61,6 +61,7 @@ export const Dashboard: React.FC = () => {
     const [cameras, setCameras] = useState<any[]>([]);
     const [recentViolations, setRecentViolations] = useState<any[]>([]);
     const [liveAlerts, setLiveAlerts] = useState<any[]>([]);
+    const [selectedFine, setSelectedFine] = useState<any>(null);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -113,9 +114,18 @@ export const Dashboard: React.FC = () => {
             }));
         });
 
+        socket.on('fine:generated', (data) => {
+            const fineData = typeof data === 'string' ? JSON.parse(data) : data;
+            console.log("Fine Generated:", fineData);
+            // Optional: update existing alert with fine
+            setLiveAlerts(prev => prev.map(a => a.id === fineData.violationId ? { ...a, fineAmount: fineData.fineAmount, fineStatus: 'pending' } : a));
+            setRecentViolations(prev => prev.map(v => v.id === fineData.violationId ? { ...v, fineAmount: fineData.fineAmount, fineStatus: 'pending' } : v));
+        });
+
         return () => {
             socket.off('violation:new');
             socket.off('camera:offline');
+            socket.off('fine:generated');
         };
     }, []);
 
@@ -164,11 +174,70 @@ export const Dashboard: React.FC = () => {
                                 cameraId={v.cameraId}
                                 status={v.status}
                                 vehicle={v.vehicle}
+                                fineAmount={v.fineAmount}
+                                fineStatus={v.fineStatus}
+                                onClick={async () => {
+                                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                                    const res = await fetch(`${apiUrl}/violations/${v.id}/fine`, {
+                                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                                    });
+                                    if (res.ok) setSelectedFine(await res.json());
+                                }}
                             />
                         ))}
                     </div>
                 </div>
             </section>
+
+            {/* Fine Details Modal */}
+            {selectedFine && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="glass-panel w-full max-w-md p-6 rounded-lg border-alert/30 relative animate-in fade-in zoom-in duration-300">
+                        <button
+                            onClick={() => setSelectedFine(null)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-white"
+                        >✕</button>
+
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="size-12 rounded-full bg-alert/20 flex items-center justify-center border border-alert/40 text-alert">
+                                <ShieldAlert className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-display font-bold text-white uppercase tracking-tight">E-Challan Details</h3>
+                                <p className="text-xs text-slate-400 font-mono">{selectedFine.plateNumber} • {selectedFine.violationType}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 font-mono">
+                            <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                <span className="text-slate-400">BASE FINE</span>
+                                <span className="text-white font-bold">₹{selectedFine.calculation.baseAmount}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                <span className="text-slate-400">VEHICLE RISK</span>
+                                <span className={clsx(
+                                    "font-bold",
+                                    selectedFine.calculation.riskLevel === 'CRITICAL' ? "text-alert" :
+                                        selectedFine.calculation.riskLevel === 'HIGH' ? "text-alert/80" : "text-success"
+                                )}>{selectedFine.calculation.riskLevel}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                <span className="text-slate-400">REPEAT MULTIPLIER</span>
+                                <span className="text-warning font-bold">{selectedFine.calculation.appliedMultiplier}x</span>
+                            </div>
+                            <div className="flex justify-between items-center text-lg pt-2">
+                                <span className="text-primary font-bold">TOTAL FINE</span>
+                                <span className="text-alert font-bold text-2xl animate-pulse">₹{selectedFine.fineAmount}</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-3">
+                            <Button variant="alert" className="flex-1 uppercase font-display font-bold text-xs" onClick={() => setSelectedFine(null)}>Close Matrix</Button>
+                            <Button variant="primary" className="flex-1 uppercase font-display font-bold text-xs">Print Receipt</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Center Column: Live Map (6 Cols) */}
             <section className="col-span-6 flex flex-col h-full relative">
@@ -205,7 +274,12 @@ export const Dashboard: React.FC = () => {
                                         <span className="text-[10px] font-mono text-slate-300">{new Date(alert.createdAt || Date.now()).toLocaleTimeString()}</span>
                                     </div>
                                     <h4 className="text-sm font-bold text-white font-display mb-1">{alert.type.replace('_', ' ')}</h4>
-                                    <p className="text-xs text-slate-400 mb-2 truncate">Node ID: {alert.cameraId} | Threat: {Number(alert.threatScore || 0).toFixed(0)}</p>
+                                    <p className="text-xs text-slate-400 mb-1 truncate">Node ID: {alert.cameraId} | Threat: {Number(alert.threatScore || 0).toFixed(0)}</p>
+                                    {alert.fineAmount && (
+                                        <p className="text-xs font-bold text-warning mb-2">
+                                            ESTIMATED FINE: ₹{alert.fineAmount.toLocaleString()}
+                                        </p>
+                                    )}
 
                                     {alert.evidenceImageUrl && (
                                         <div className="w-full h-16 bg-black border border-slate-700/50 rounded mb-2 overflow-hidden">

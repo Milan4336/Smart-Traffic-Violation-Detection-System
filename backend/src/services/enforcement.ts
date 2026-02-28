@@ -1,5 +1,3 @@
-import { Vehicle } from '@prisma/client';
-
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export const calculateRiskLevel = (violationCount: number): RiskLevel => {
@@ -7,6 +5,31 @@ export const calculateRiskLevel = (violationCount: number): RiskLevel => {
     if (violationCount >= 6) return 'HIGH';
     if (violationCount >= 3) return 'MEDIUM';
     return 'LOW';
+};
+
+/**
+ * Calculates the fine amount based on base rules and repeat offender status.
+ */
+export const calculateFine = async (prisma: any, violationType: string, vehicleCount: number) => {
+    // Fetch rule
+    const rule = await prisma.violationFineRule.findUnique({
+        where: { violationType: violationType }
+    }) || await prisma.violationFineRule.findUnique({
+        where: { violationType: violationType.toUpperCase() }
+    });
+
+    if (!rule) return 0;
+
+    let fine = rule.baseAmount;
+    const multiplier = rule.repeatMultiplier || 1.0;
+
+    if (vehicleCount >= 10) {
+        fine = Math.floor(rule.baseAmount * multiplier * 1.5);
+    } else if (vehicleCount >= 3) {
+        fine = Math.floor(rule.baseAmount * multiplier);
+    }
+
+    return fine;
 };
 
 /**

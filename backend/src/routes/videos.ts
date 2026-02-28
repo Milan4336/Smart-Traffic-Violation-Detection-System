@@ -5,7 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { updateOrCreateVehicle } from '../services/enforcement';
+import { updateOrCreateVehicle, calculateFine } from '../services/enforcement';
 import crypto from 'crypto';
 
 const router = Router();
@@ -100,7 +100,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
 router.get('/:id', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
     try {
         const { id } = req.params;
-        const video = await prisma.uploadedVideo.findUnique({
+        const video = await (prisma as any).uploadedVideo.findUnique({
             where: { id: id as string },
             include: {
                 violations: {
@@ -136,7 +136,7 @@ router.patch('/:id/status', authenticateInternal, async (req: Request, res: Resp
             updateData.durationSeconds = parseFloat(durationSeconds);
         }
 
-        const video = await prisma.uploadedVideo.update({
+        const video = await (prisma as any).uploadedVideo.update({
             where: { id },
             data: updateData
         });
@@ -160,7 +160,7 @@ router.post('/:id/violations', authenticateInternal, async (req: Request, res: R
         const id = req.params.id as string;
         const { violationType, confidenceScore, frameTimestamp, plateNumber, boundingBox, evidenceImagePath } = req.body;
 
-        const violation = await prisma.videoViolation.create({
+        const violation = await (prisma as any).videoViolation.create({
             data: {
                 videoId: id,
                 violationType,
@@ -173,21 +173,42 @@ router.post('/:id/violations', authenticateInternal, async (req: Request, res: R
         });
 
         // Feature 1: Repeat Offender Detection
+        let vehicle = null;
         if (plateNumber) {
-            await updateOrCreateVehicle(prisma, plateNumber);
+            vehicle = await updateOrCreateVehicle(prisma, plateNumber);
         }
 
+        // Feature 2: Automatic Fine Calculation
+        const fineAmount = await calculateFine(prisma, violationType, vehicle?.totalViolations || 0);
+
+        // Update violation with fine info
+        await (prisma as any).videoViolation.update({
+            where: { id: violation.id },
+            data: {
+                fineAmount,
+                fineStatus: 'pending',
+                fineGeneratedAt: new Date()
+            }
+        });
+
         // Notify frontend
-        const enrichedViolation = await prisma.videoViolation.findUnique({
+        const enrichedViolation = await (prisma as any).videoViolation.findUnique({
             where: { id: violation.id },
             include: { vehicle: true }
         });
 
-        const video = await prisma.uploadedVideo.findUnique({ where: { id } });
+        const videoRecord = await (prisma as any).uploadedVideo.findUnique({ where: { id } });
         await redisPublisher.publish('video:violation', JSON.stringify({
             videoId: id,
             violation: enrichedViolation,
-            userId: video?.uploadedBy
+            userId: videoRecord?.uploadedBy
+        }));
+
+        // Emit fine generated event
+        await redisPublisher.publish('fine:generated', JSON.stringify({
+            violationId: violation.id,
+            fineAmount,
+            plateNumber
         }));
 
         res.status(201).json(enrichedViolation);

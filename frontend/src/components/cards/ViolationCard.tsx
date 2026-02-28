@@ -10,6 +10,8 @@ export interface ViolationCardProps {
     time: string;
     cameraId: string;
     status?: 'verified' | 'rejected' | 'pending';
+    fineAmount?: number | null;
+    fineStatus?: string | null;
     vehicle?: {
         totalViolations: number;
         riskLevel: string;
@@ -18,7 +20,7 @@ export interface ViolationCardProps {
 }
 
 export const ViolationCard: React.FC<ViolationCardProps> = ({
-    plate, type, confidence, time, cameraId, status = 'pending', vehicle, onClick
+    plate, type, confidence, time, cameraId, status = 'pending', vehicle, fineAmount, fineStatus, onClick
 }) => {
     const isRepeatOffender = vehicle && vehicle.totalViolations >= 3;
 
@@ -53,6 +55,14 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
                         {type} • {confidence}%
                         {vehicle && ` • RISK: ${vehicle.riskLevel}`}
                     </span>
+                    {fineAmount && (
+                        <span className={clsx(
+                            "text-[10px] font-bold mt-0.5",
+                            fineStatus === 'paid' ? "text-success" : "text-warning"
+                        )}>
+                            ₹{fineAmount.toLocaleString()} • {fineStatus?.toUpperCase()}
+                        </span>
+                    )}
                 </div>
             </div>
 

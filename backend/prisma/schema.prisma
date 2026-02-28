@@ -38,6 +38,10 @@ model Violation {
   createdAt        DateTime @default(now())
   verifiedBy       String?
   verifiedAt       DateTime?
+  
+  fineAmount       Int?
+  fineStatus       String?   @default("pending") // pending, paid, waived
+  fineGeneratedAt  DateTime? @default(now())
 
   camera           Camera   @relation(fields: [cameraId], references: [id])
   verifier         User?    @relation("VerifiedBy", fields: [verifiedBy], references: [id])
@@ -157,6 +161,10 @@ model VideoViolation {
   boundingBox        Json?
   evidenceImagePath  String?
   createdAt          DateTime @default(now())
+  
+  fineAmount         Int?
+  fineStatus         String?   @default("pending") // pending, paid, waived
+  fineGeneratedAt    DateTime? @default(now())
 
   video              UploadedVideo @relation(fields: [videoId], references: [id])
   vehicle            Vehicle?      @relation(fields: [plateNumber], references: [plateNumber])
@@ -173,4 +181,12 @@ model Vehicle {
 
   violations       Violation[]
   videoViolations  VideoViolation[]
+}
+
+model ViolationFineRule {
+  id               String   @id @default(uuid())
+  violationType    String   @unique // e.g., NO_HELMET, RED_LIGHT
+  baseAmount       Int
+  repeatMultiplier Float    @default(1.0)
+  createdAt        DateTime @default(now())
 }
