@@ -55,7 +55,18 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
 // POST /api/violations - Create new violation (Called by AI Service)
 router.post('/', upload.single('evidenceImage'), async (req: Request, res: Response): Promise<any> => {
     try {
-        const { type, plateNumber, vehicleType, confidenceScore, threatScore, cameraId, locationLat, locationLng } = req.body;
+        const {
+            type,
+            plateNumber,
+            vehicleType,
+            confidenceScore,
+            threatScore,
+            cameraId,
+            locationLat,
+            locationLng,
+            videoTimestampSeconds,
+            boundingBox
+        } = req.body;
 
         let evidenceImageUrl = null;
         if (req.file) {
@@ -73,7 +84,9 @@ router.post('/', upload.single('evidenceImage'), async (req: Request, res: Respo
                 cameraId,
                 locationLat: locationLat ? parseFloat(locationLat) : null,
                 locationLng: locationLng ? parseFloat(locationLng) : null,
-                evidenceImageUrl
+                evidenceImageUrl,
+                videoTimestampSeconds: videoTimestampSeconds ? parseFloat(videoTimestampSeconds) : null,
+                boundingBox: boundingBox ? (typeof boundingBox === 'string' ? JSON.parse(boundingBox) : boundingBox) : null
             },
             include: { camera: true }
         });
@@ -201,6 +214,40 @@ router.get('/:id/fine', authenticateToken, async (req: AuthRequest, res: Respons
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch fine details' });
+    }
+});
+
+// GET /api/violations/:id/evidence - Get specialized evidence data for the viewer
+router.get('/:id/evidence', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const { id } = req.params;
+        const violation = await (prisma as any).violation.findUnique({
+            where: { id: id as string },
+            include: { camera: true }
+        });
+
+        if (!violation) {
+            return res.status(404).json({ error: 'Violation not found' });
+        }
+
+        res.json({
+            imageUrl: violation.evidenceImageUrl,
+            videoUrl: violation.evidenceVideoPath,
+            timestampSeconds: violation.videoTimestampSeconds,
+            boundingBox: violation.boundingBox,
+            metadata: {
+                plateNumber: violation.plateNumber,
+                type: violation.type,
+                confidence: violation.confidenceScore,
+                cameraId: violation.cameraId,
+                cameraName: violation.camera?.name,
+                location: { lat: violation.locationLat, lng: violation.locationLng },
+                time: violation.createdAt,
+                fineAmount: violation.fineAmount
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch evidence metadata' });
     }
 });
 

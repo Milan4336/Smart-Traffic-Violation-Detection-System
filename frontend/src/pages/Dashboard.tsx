@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { ViolationCard } from '../components/cards/ViolationCard';
-import { ShieldAlert, Cpu, Video, Activity, Globe, Bell, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
+import { ShieldAlert, Cpu, Video, Activity, Globe, Bell } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { socket } from '../socket';
 import { LiveMap } from '../components/LiveMap';
+import { EvidenceViewer } from '../components/EvidenceViewer';
 import { AlertPopup } from '../components/AlertPopup';
 
 export const AnalyticsCard: React.FC<{
@@ -65,6 +66,7 @@ export const Dashboard: React.FC = () => {
     const [recentViolations, setRecentViolations] = useState<any[]>([]);
     const [liveAlerts, setLiveAlerts] = useState<any[]>([]);
     const [selectedFine, setSelectedFine] = useState<any>(null);
+    const [selectedViolationId, setSelectedViolationId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -242,13 +244,7 @@ export const Dashboard: React.FC = () => {
                                 vehicle={v.vehicle}
                                 fineAmount={v.fineAmount}
                                 fineStatus={v.fineStatus}
-                                onClick={async () => {
-                                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                                    const res = await fetch(`${apiUrl}/violations/${v.id}/fine`, {
-                                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                                    });
-                                    if (res.ok) setSelectedFine(await res.json());
-                                }}
+                                onClick={() => setSelectedViolationId(v.id)}
                             />
                         ))}
                     </div>
@@ -409,18 +405,24 @@ export const Dashboard: React.FC = () => {
                                     </div>
                                     <div className="text-[9px] text-slate-400 mb-2">NODE: {alert.cameraId}</div>
 
-                                    <div className="flex gap-2 mt-2">
+                                    <div className="flex gap-1 mt-2">
+                                        <button
+                                            onClick={() => setSelectedViolationId(alert.violationId)}
+                                            className="flex-1 bg-white/5 hover:bg-white/10 py-1 rounded border border-white/5 transition-colors uppercase font-bold text-[8px]"
+                                        >
+                                            Audit
+                                        </button>
                                         {alert.status === 'ACTIVE' ? (
                                             <button
                                                 onClick={() => handleAcknowledgeAlert(alert.id)}
-                                                className="flex-1 bg-white/10 hover:bg-white/20 py-1.5 rounded border border-white/10 transition-colors uppercase font-bold text-[8px]"
+                                                className="flex-1 bg-white/10 hover:bg-white/20 py-1 rounded border border-white/10 transition-colors uppercase font-bold text-[8px]"
                                             >
                                                 Acknowledge
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={() => handleResolveAlert(alert.id)}
-                                                className="flex-1 bg-success/20 hover:bg-success/30 text-success py-1.5 rounded border border-success/30 transition-colors uppercase font-bold text-[8px]"
+                                                className="flex-1 bg-success/20 hover:bg-success/30 text-success py-1 rounded border border-success/30 transition-colors uppercase font-bold text-[8px]"
                                             >
                                                 Resolve
                                             </button>
@@ -448,6 +450,13 @@ export const Dashboard: React.FC = () => {
                     </div>
                 </div>
             </section>
+            {selectedViolationId && (
+                <EvidenceViewer
+                    violationId={selectedViolationId}
+                    onClose={() => setSelectedViolationId(null)}
+                />
+            )}
+
             {activePopupAlert && (
                 <AlertPopup
                     alert={activePopupAlert}

@@ -60,6 +60,7 @@ def stream_reader(cam_id, rtsp_url, lat, lng):
         last_frame = None
         freeze_start_time = 0
         failure_count = 0
+        session_start_time = time.time()
         
         while cap.isOpened():
             start_capture = time.time()
@@ -149,7 +150,9 @@ def stream_reader(cam_id, rtsp_url, lat, lng):
                     "threatScore": str(round(random.uniform(20.0, 95.0), 1)),
                     "cameraId": cam_id,
                     "locationLat": str(lat),
-                    "locationLng": str(lng)
+                    "locationLng": str(lng),
+                    "videoTimestampSeconds": str(round(current_time - session_start_time, 2)),
+                    "boundingBox": json.dumps(best_obj.xyxy[0].tolist())
                 }
                 
                 success, buffer = cv2.imencode('.jpg', frame)
@@ -323,6 +326,7 @@ def process_video(video_id, video_path):
                         "violationType": v_type,
                         "confidenceScore": confidence,
                         "frameTimestamp": timestamp,
+                        "videoTimestampSeconds": timestamp,
                         "plateNumber": generate_mock_plate(),
                         "boundingBox": best_obj.xyxy[0].tolist(),
                         "evidenceImagePath": f"/uploads/evidence/{evidence_filename}"

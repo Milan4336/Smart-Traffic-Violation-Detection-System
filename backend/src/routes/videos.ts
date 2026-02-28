@@ -166,9 +166,11 @@ router.post('/:id/violations', authenticateInternal, async (req: Request, res: R
                 violationType,
                 confidenceScore: parseFloat(confidenceScore),
                 frameTimestamp: parseFloat(frameTimestamp),
+                videoTimestampSeconds: req.body.videoTimestampSeconds ? parseFloat(req.body.videoTimestampSeconds) : parseFloat(frameTimestamp),
                 plateNumber,
-                boundingBox,
-                evidenceImagePath
+                boundingBox: boundingBox ? (typeof boundingBox === 'string' ? JSON.parse(boundingBox) : boundingBox) : null,
+                evidenceImagePath,
+                evidenceVideoPath: req.body.evidenceVideoPath || null
             }
         });
 

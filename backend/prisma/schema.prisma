@@ -33,7 +33,9 @@ model Violation {
   locationLat      Float?
   locationLng      Float?
   evidenceImageUrl String?
-  evidenceVideoUrl String?
+  evidenceVideoPath String?
+  videoTimestampSeconds Float?
+  boundingBox      Json?
   status           String   @default("pending") // pending, verified, rejected, dispatched
   createdAt        DateTime @default(now())
   verifiedBy       String?
@@ -167,9 +169,11 @@ model VideoViolation {
   violationType      String
   confidenceScore    Float
   frameTimestamp     Float
+  videoTimestampSeconds Float?
   plateNumber        String?
   boundingBox        Json?
   evidenceImagePath  String?
+  evidenceVideoPath  String?
   createdAt          DateTime @default(now())
   
   fineAmount         Int?
