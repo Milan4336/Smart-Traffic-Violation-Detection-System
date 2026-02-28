@@ -5,6 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { updateOrCreateVehicle } from '../services/enforcement';
 import crypto from 'crypto';
 
 const router = Router();
@@ -103,7 +104,8 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res: Response): P
             where: { id: id as string },
             include: {
                 violations: {
-                    orderBy: { frameTimestamp: 'asc' }
+                    orderBy: { frameTimestamp: 'asc' },
+                    include: { vehicle: true }
                 }
             }
         });
@@ -170,15 +172,25 @@ router.post('/:id/violations', authenticateInternal, async (req: Request, res: R
             }
         });
 
+        // Feature 1: Repeat Offender Detection
+        if (plateNumber) {
+            await updateOrCreateVehicle(prisma, plateNumber);
+        }
+
         // Notify frontend
+        const enrichedViolation = await prisma.videoViolation.findUnique({
+            where: { id: violation.id },
+            include: { vehicle: true }
+        });
+
         const video = await prisma.uploadedVideo.findUnique({ where: { id } });
         await redisPublisher.publish('video:violation', JSON.stringify({
             videoId: id,
-            violation,
+            violation: enrichedViolation,
             userId: video?.uploadedBy
         }));
 
-        res.status(201).json(violation);
+        res.status(201).json(enrichedViolation);
     } catch (error) {
         console.error('Error creating video violation:', error);
         res.status(500).json({ error: 'Failed to create video violation' });

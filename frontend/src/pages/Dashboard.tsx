@@ -91,14 +91,16 @@ export const Dashboard: React.FC = () => {
         fetchDashboardData();
 
         // Socket Bindings
-        socket.on('violation:new', (violation) => {
+        socket.on('violation:new', (violationData) => {
+            const violation = typeof violationData === 'string' ? JSON.parse(violationData) : violationData;
             setAnalytics(prev => ({
                 ...prev,
                 todayViolations: prev.todayViolations + 1,
                 totalViolations: prev.totalViolations + 1
             }));
 
-            setLiveAlerts(prev => [JSON.parse(violation), ...prev].slice(0, 10)); // Keep top 10
+            setLiveAlerts(prev => [violation, ...prev].slice(0, 10)); // Keep top 10
+            setRecentViolations(prev => [violation, ...prev].slice(0, 5));
         });
 
         socket.on('camera:offline', (cam) => {
@@ -161,6 +163,7 @@ export const Dashboard: React.FC = () => {
                                 time={new Date(v.createdAt).toLocaleTimeString()}
                                 cameraId={v.cameraId}
                                 status={v.status}
+                                vehicle={v.vehicle}
                             />
                         ))}
                     </div>

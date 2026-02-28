@@ -5,6 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { authenticateToken, requireClearance, AuthRequest } from '../middleware/auth';
+import { updateOrCreateVehicle } from '../services/enforcement';
 
 const router = Router();
 
@@ -37,7 +38,10 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
             orderBy: { createdAt: 'desc' },
             take: limit,
             skip: (page - 1) * limit,
-            include: { camera: true }
+            include: {
+                camera: true,
+                vehicle: true
+            }
         });
 
         const total = await prisma.violation.count({ where: whereClause });
@@ -74,10 +78,21 @@ router.post('/', upload.single('evidenceImage'), async (req: Request, res: Respo
             include: { camera: true }
         });
 
-        // Publish event to Redis for real-time dashboard updates
-        await redisPublisher.publish('violation:new', JSON.stringify(violation));
+        // Feature 1: Repeat Offender Detection
+        if (plateNumber) {
+            await updateOrCreateVehicle(prisma, plateNumber);
+        }
 
-        res.status(201).json(violation);
+        // Re-fetch to include updated vehicle stats if needed, or just broadcast the violation
+        const enrichedViolation = await prisma.violation.findUnique({
+            where: { id: violation.id },
+            include: { camera: true, vehicle: true }
+        });
+
+        // Publish event to Redis for real-time dashboard updates
+        await redisPublisher.publish('violation:new', JSON.stringify(enrichedViolation));
+
+        res.status(201).json(enrichedViolation);
     } catch (error) {
         console.error('Error creating violation:', error);
         res.status(500).json({ error: 'Failed to create violation' });
