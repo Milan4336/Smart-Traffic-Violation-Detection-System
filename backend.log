@@ -1,0 +1,14 @@
+ng-backend  | Prisma schema loaded from prisma/schema.prisma.
+ng-backend  | Error: Prisma schema validation - (get-config wasm)
+ng-backend  | Error code: P1012
+ng-backend  | error: The datasource property `url` is no longer supported in schema files. Move connection URLs for Migrate to `prisma.config.ts` and pass either `adapter` for a direct database connection or `accelerateUrl` for Accelerate to the `PrismaClient` constructor. See https://pris.ly/d/config-datasource and https://pris.ly/d/prisma7-client-config
+ng-backend  |   -->  prisma/schema.prisma:8
+ng-backend  |    | 
+ng-backend  |  7 |   provider = "postgresql"
+ng-backend  |  8 |   url      = env("DATABASE_URL")
+ng-backend  |    | 
+ng-backend  | 
+ng-backend  | Validation Error Count: 1
+ng-backend  | [Context: getConfig]
+ng-backend  | 
+ng-backend  | Prisma CLI Version : 7.4.2

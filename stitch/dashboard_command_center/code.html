@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neon Guardian - Command Center</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Rajdhani:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00F0FF",
+                        alert: "#FF2A6D",
+                        success: "#05FFA1",
+                        background: {
+                            light: "#f5f8f8",
+                            dark: "#050A14",
+                        },
+                        surface: {
+                            dark: "rgba(15, 23, 42, 0.6)",
+                        }
+                    },
+                    fontFamily: {
+                        display: ["Rajdhani", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(0, 240, 255, 0.5)',
+                        'neon-alert': '0 0 10px rgba(255, 42, 109, 0.5)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050A14; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00F0FF; 
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        /* Animations */
+        @keyframes pulse-border {
+            0% { border-color: rgba(255, 42, 109, 0.2); box-shadow: 0 0 0 rgba(255, 42, 109, 0); }
+            50% { border-color: rgba(255, 42, 109, 0.8); box-shadow: 0 0 20px rgba(255, 42, 109, 0.3); }
+            100% { border-color: rgba(255, 42, 109, 0.2); box-shadow: 0 0 0 rgba(255, 42, 109, 0); }
+        }
+        
+        .animate-pulse-border {
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .scanline-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanline-effect::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 240, 255, 0.1) 50%, transparent 100%);
+            animation: scanline 4s linear infinite;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-[#050A14] text-[#E2E8F0] font-body overflow-hidden h-screen flex flex-col">
+<!-- Top Navigation / HUD Header -->
+<header class="h-16 border-b border-[#00F0FF]/20 bg-[#050A14]/80 backdrop-blur-md flex items-center justify-between px-6 z-50 shrink-0">
+<!-- Logo Area -->
+<div class="flex items-center gap-4">
+<div class="relative size-8 flex items-center justify-center">
+<div class="absolute inset-0 border border-[#00F0FF] rotate-45"></div>
+<div class="absolute inset-2 bg-[#00F0FF]/20 rotate-45"></div>
+<span class="material-symbols-outlined text-[#00F0FF] relative z-10 text-[20px]">security</span>
+</div>
+<h1 class="font-display font-bold text-2xl tracking-wider text-white">NEON <span class="text-primary">GUARDIAN</span></h1>
+</div>
+<!-- Search Bar -->
+<div class="flex-1 max-w-xl mx-8">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-500 group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-[#1e293b] rounded bg-[#0f172a]/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono transition-all" placeholder="SEARCH CAMERA ID, PLATE, OR LOCATION..." type="text"/>
+</div>
+</div>
+<!-- System Status & Profile -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded bg-[#05FFA1]/10 border border-[#05FFA1]/20">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#05FFA1] opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-[#05FFA1]"></span>
+</span>
+<span class="text-[#05FFA1] text-xs font-bold tracking-widest font-mono">SYSTEM ONLINE</span>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-slate-800">
+<div class="text-right hidden md:block">
+<div class="text-sm font-medium text-white font-display">CMDR. A. VANCE</div>
+<div class="text-xs text-primary font-mono">LVL 4 CLEARANCE</div>
+</div>
+<div class="size-10 rounded bg-slate-800 border border-slate-700 bg-cover bg-center" data-alt="User Avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBkkQPVEFZaevLjdwb74_ZeSOOIr5Q2FXUjR6RSjEzth9r4KthtCcA8CiblOsqLX7js-9fk-BLNe-niW7Vuq0MzX3LC3-NYa58v0Aelt39UDBE0M8xZvRVo1vzDT4ixqiGjaXd6o67n_KPuurT3eW-vUfedbThk2LcqBxCqDsWfJ2g3-c_H_F9VvLWB3yaF8X4xClKVvchkSJ32nTCUAOYe3zi1RMfFOy8pz9KpHPNSUck2CxE-9Iq85B8Uh1xREZ1rf8vvD0pn-_RQ');"></div>
+</div>
+</div>
+</header>
+<!-- Main Layout Grid -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-20 bg-[#050A14] border-r border-[#00F0FF]/10 flex flex-col items-center py-6 gap-6 z-40 shrink-0">
+<nav class="flex flex-col gap-4 w-full px-2">
+<button class="group flex flex-col items-center gap-1 p-2 rounded hover:bg-white/5 relative">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r shadow-neon opacity-100 transition-opacity"></div>
+<span class="material-symbols-outlined text-primary text-[28px]">dashboard</span>
+<span class="text-[10px] font-display font-semibold text-primary">CMD</span>
+</button>
+<button class="group flex flex-col items-center gap-1 p-2 rounded hover:bg-white/5 relative text-slate-500 hover:text-white transition-colors">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r shadow-neon opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<span class="material-symbols-outlined text-[28px]">grid_view</span>
+<span class="text-[10px] font-display font-semibold">GRID</span>
+</button>
+<button class="group flex flex-col items-center gap-1 p-2 rounded hover:bg-white/5 relative text-slate-500 hover:text-white transition-colors">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r shadow-neon opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<span class="material-symbols-outlined text-[28px]">table_rows</span>
+<span class="text-[10px] font-display font-semibold">LOGS</span>
+</button>
+<button class="group flex flex-col items-center gap-1 p-2 rounded hover:bg-white/5 relative text-slate-500 hover:text-white transition-colors">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r shadow-neon opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<span class="material-symbols-outlined text-[28px]">monitoring</span>
+<span class="text-[10px] font-display font-semibold">STATS</span>
+</button>
+</nav>
+<div class="mt-auto flex flex-col gap-4 w-full px-2">
+<button class="group flex flex-col items-center gap-1 p-2 rounded hover:bg-white/5 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">settings</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 grid grid-cols-12 gap-6 p-6 overflow-hidden relative">
+<!-- Left Column: Key Stats (3 Cols) -->
+<section class="col-span-3 flex flex-col gap-4 h-full overflow-y-auto pr-1 pb-4">
+<h2 class="font-display font-bold text-lg text-white/80 uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">analytics</span> SYSTEM METRICS
+                </h2>
+<!-- Stat Card 1: Violations -->
+<div class="glass-panel p-5 rounded-lg relative overflow-hidden group hover:bg-[#0f172a]/80 transition-all cursor-pointer hover:-translate-y-1 hover:shadow-neon">
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary shadow-neon"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="text-slate-400 text-xs font-display uppercase tracking-wider">Violations Today</span>
+<span class="material-symbols-outlined text-primary/50 text-xl">warning</span>
+</div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="text-3xl font-mono font-bold text-white">1,240</span>
+<span class="text-xs font-mono text-alert">▲ 12%</span>
+</div>
+<div class="w-full bg-slate-800 h-1 rounded-full mt-2 overflow-hidden">
+<div class="bg-primary h-full w-[75%] shadow-[0_0_10px_#00F0FF]"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-2 font-mono">LAST UPDATED: 10:42:05</p>
+</div>
+<!-- Stat Card 2: Accuracy -->
+<div class="glass-panel p-5 rounded-lg relative overflow-hidden group hover:bg-[#0f172a]/80 transition-all cursor-pointer hover:-translate-y-1">
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-success shadow-[0_0_10px_#05FFA1]"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="text-slate-400 text-xs font-display uppercase tracking-wider">AI Confidence</span>
+<span class="material-symbols-outlined text-success/50 text-xl">psychology</span>
+</div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="text-3xl font-mono font-bold text-white">99.8%</span>
+<span class="text-xs font-mono text-success">▲ 0.2%</span>
+</div>
+<div class="w-full bg-slate-800 h-1 rounded-full mt-2 overflow-hidden">
+<div class="bg-success h-full w-[99%] shadow-[0_0_10px_#05FFA1]"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-2 font-mono">MODEL V2.4.1 ACTIVE</p>
+</div>
+<!-- Stat Card 3: Active Cameras -->
+<div class="glass-panel p-5 rounded-lg relative overflow-hidden group hover:bg-[#0f172a]/80 transition-all cursor-pointer hover:-translate-y-1">
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-primary shadow-neon"></div>
+<div class="flex justify-between items-start mb-2">
+<span class="text-slate-400 text-xs font-display uppercase tracking-wider">Active Nodes</span>
+<span class="material-symbols-outlined text-primary/50 text-xl">videocam</span>
+</div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="text-3xl font-mono font-bold text-white">42<span class="text-slate-500 text-lg">/42</span></span>
+</div>
+<div class="flex gap-1 mt-2">
+<!-- Pseudo grid of camera dots -->
+<div class="size-1.5 rounded-full bg-primary shadow-neon"></div>
+<div class="size-1.5 rounded-full bg-primary shadow-neon"></div>
+<div class="size-1.5 rounded-full bg-primary shadow-neon"></div>
+<div class="size-1.5 rounded-full bg-primary shadow-neon"></div>
+<div class="size-1.5 rounded-full bg-primary shadow-neon"></div>
+<div class="size-1.5 rounded-full bg-primary shadow-neon"></div>
+<div class="size-1.5 rounded-full bg-primary shadow-neon"></div>
+<div class="size-1.5 rounded-full bg-alert shadow-neon-alert animate-pulse"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-2 font-mono">1 NODE REPORTING LATENCY</p>
+</div>
+<!-- Mini Feed: Recent Processed -->
+<div class="mt-4 flex flex-col gap-2 flex-1 min-h-0">
+<h3 class="text-slate-400 text-xs font-display uppercase tracking-wider mb-1">Recent Verifications</h3>
+<div class="flex flex-col gap-2 overflow-hidden">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-2 rounded bg-white/5 border border-white/5 hover:border-primary/30 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-800 flex items-center justify-center border border-slate-700">
+<span class="material-symbols-outlined text-xs text-white">directions_car</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-mono text-primary group-hover:text-white">XYZ-982</span>
+<span class="text-[10px] text-slate-500">SPEEDING</span>
+</div>
+</div>
+<span class="text-[10px] font-bold text-success bg-success/10 px-1.5 py-0.5 rounded border border-success/20">VERIFIED</span>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-2 rounded bg-white/5 border border-white/5 hover:border-primary/30 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-800 flex items-center justify-center border border-slate-700">
+<span class="material-symbols-outlined text-xs text-white">local_shipping</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-mono text-primary group-hover:text-white">TRK-441</span>
+<span class="text-[10px] text-slate-500">RED LIGHT</span>
+</div>
+</div>
+<span class="text-[10px] font-bold text-slate-400 bg-slate-700/50 px-1.5 py-0.5 rounded border border-slate-600">REJECTED</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Center Column: Live Map (6 Cols) -->
+<section class="col-span-6 flex flex-col h-full relative">
+<h2 class="font-display font-bold text-lg text-white/80 uppercase tracking-widest flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-sm">map</span> GEOSPATIAL MATRIX
+                </h2>
+<div class="flex-1 glass-panel rounded-lg relative overflow-hidden scanline-effect group">
+<!-- Map Background Image Placeholder -->
+<div class="absolute inset-0 bg-cover bg-center opacity-40 grayscale contrast-125" data-alt="Dark Mode City Map" data-location="New York City" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1on6kX8g89QV_IixxJ3999G9jmBxDDKzIiMeF6bXVO5WO87BeqLVCEW555AVJBy_GTENJANDZLkSROPQdMR-nL2ETih7Oongo71igASkChPG4PQ60a6nGaoNorgY0FSnqDkjZpoUgj_iTCygaR4MJe3xiuIPj-Vk-V2YCwpSyxZ8Frz66-HSVR6ZyvZNgh_QW7hScI3LUd1HegafNz0TwZ9l82w5JjBBntZdMxCWsepEScwsG2aOtoFjqSN-GCvMUG6s95E-DJmJg'); background-color: #0f172a;"></div>
+<!-- Decorative Map Grid Overlay -->
+<div class="absolute inset-0 pointer-events-none" style="background-image: linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px); background-size: 40px 40px;"></div>
+<!-- Map UI: Top Right Controls -->
+<div class="absolute top-4 right-4 flex flex-col gap-2 z-10">
+<button class="size-8 glass-panel flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-colors rounded">
+<span class="material-symbols-outlined text-lg">add</span>
+</button>
+<button class="size-8 glass-panel flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-colors rounded">
+<span class="material-symbols-outlined text-lg">remove</span>
+</button>
+<button class="size-8 glass-panel flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-colors rounded mt-2">
+<span class="material-symbols-outlined text-lg">layers</span>
+</button>
+</div>
+<!-- Map UI: Bottom Left Legend -->
+<div class="absolute bottom-4 left-4 glass-panel px-3 py-2 rounded flex flex-col gap-1 z-10">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-primary shadow-neon"></span>
+<span class="text-[10px] font-mono text-slate-300">ACTIVE CAMERA</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-alert shadow-neon-alert animate-pulse"></span>
+<span class="text-[10px] font-mono text-slate-300">CRITICAL EVENT</span>
+</div>
+</div>
+<!-- Map Elements: Glowing Dots (Simulated) -->
+<!-- Active Dot -->
+<div class="absolute top-[40%] left-[30%] group/pin cursor-pointer">
+<div class="relative flex items-center justify-center">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-20 size-8"></span>
+<span class="relative inline-flex rounded-full size-3 bg-primary shadow-neon border-2 border-white"></span>
+</div>
+<!-- Tooltip -->
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/pin:block whitespace-nowrap z-20">
+<div class="bg-slate-900 border border-primary/50 text-white text-xs px-2 py-1 rounded shadow-lg font-mono">
+                                CAM-04: ONLINE
+                            </div>
+</div>
+</div>
+<!-- Alert Dot -->
+<div class="absolute top-[60%] left-[55%] group/pin cursor-pointer">
+<div class="relative flex items-center justify-center">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-alert opacity-40 size-12"></span>
+<span class="relative inline-flex rounded-full size-4 bg-alert shadow-neon-alert border-2 border-white animate-pulse"></span>
+</div>
+<!-- Alert Card Preview -->
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden group-hover/pin:block w-48 z-20">
+<div class="glass-panel border-alert/50 bg-[#050A14]/90 p-2 rounded shadow-2xl">
+<div class="h-24 bg-slate-800 rounded mb-2 overflow-hidden relative">
+<div class="absolute inset-0 bg-cover bg-center opacity-75" data-alt="Car speeding" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDL-HvLAINS8q31ZCqrJEdDE80Hb5RL5uvjJWRpj3Pg-YupqWDmI54Xck5YPUvoWgaO6NS4xth4z7SUH1PGnTkqSd4M3XSFN0-_UvSFBcFPaQDxdz6NbUVMflkctookWB1pDoXOTJhyqfMbofqwptTi7bIOFwk7gbZQD1c84fVLT1TXDfg4hQ8cNd7Lx9zml7GVM8XZUqIqa25n8C4u_7JOUwU8pVEo86uE5GVncQlyAILo_YBPbzlxJUYJK96WxwTIEsmmzaJk5yRX')"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-alert text-3xl drop-shadow-md">warning</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs font-bold text-alert font-display">SPEEDING DETECTED</span>
+<span class="text-[10px] font-mono text-white">92 MPH</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Corner Brackets Decoration -->
+<svg class="absolute top-2 left-2 w-8 h-8 text-primary/50" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2 10V2H10"></path>
+</svg>
+<svg class="absolute top-2 right-2 w-8 h-8 text-primary/50 rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2 10V2H10"></path>
+</svg>
+<svg class="absolute bottom-2 left-2 w-8 h-8 text-primary/50 -rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2 10V2H10"></path>
+</svg>
+<svg class="absolute bottom-2 right-2 w-8 h-8 text-primary/50 rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2 10V2H10"></path>
+</svg>
+</div>
+</section>
+<!-- Right Column: Alert Ticker (3 Cols) -->
+<section class="col-span-3 flex flex-col h-full gap-4">
+<h2 class="font-display font-bold text-lg text-white/80 uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-alert text-sm">notifications_active</span> LIVE INTELLIGENCE
+                </h2>
+<div class="flex-1 glass-panel rounded-lg overflow-hidden flex flex-col">
+<div class="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center">
+<span class="text-xs font-mono text-slate-400">FEED STATUS</span>
+<div class="flex items-center gap-1.5">
+<span class="size-1.5 rounded-full bg-success animate-pulse"></span>
+<span class="text-[10px] font-bold text-success tracking-wider">LIVE</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-2 space-y-2 relative">
+<!-- Critical Alert Item -->
+<div class="animate-pulse-border bg-alert/10 border border-alert/50 p-3 rounded relative overflow-hidden group hover:bg-alert/20 transition-colors cursor-pointer">
+<div class="absolute top-0 right-0 p-1">
+<span class="material-symbols-outlined text-alert text-base">warning</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-alert font-bold border border-alert/30 px-1 rounded">CRITICAL</span>
+<span class="text-[10px] font-mono text-slate-300">10:42:12</span>
+</div>
+<h4 class="text-sm font-bold text-white font-display">WRONG WAY DRIVER</h4>
+<p class="text-xs text-slate-400">Intersection 4B - North Corridor</p>
+<div class="mt-2 flex gap-2">
+<button class="flex-1 bg-alert/20 hover:bg-alert text-alert hover:text-white text-[10px] py-1 px-2 rounded font-bold uppercase tracking-wider transition-all border border-alert/50">Dispatch</button>
+<button class="flex-1 bg-transparent hover:bg-white/10 text-white text-[10px] py-1 px-2 rounded font-bold uppercase tracking-wider transition-all border border-white/20">View Cam</button>
+</div>
+</div>
+</div>
+<!-- Standard Item -->
+<div class="bg-white/5 border border-white/10 p-3 rounded hover:bg-white/10 transition-colors cursor-pointer group">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-primary font-bold border border-primary/30 px-1 rounded">INFO</span>
+<span class="text-[10px] font-mono text-slate-400">10:40:55</span>
+</div>
+<h4 class="text-sm font-medium text-white font-display group-hover:text-primary transition-colors">System Patch Applied</h4>
+<p class="text-xs text-slate-500">Auto-deployed fix for Cam-09 latency.</p>
+</div>
+</div>
+<!-- Standard Item -->
+<div class="bg-white/5 border border-white/10 p-3 rounded hover:bg-white/10 transition-colors cursor-pointer group">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-orange-400 font-bold border border-orange-400/30 px-1 rounded">WARN</span>
+<span class="text-[10px] font-mono text-slate-400">10:38:20</span>
+</div>
+<h4 class="text-sm font-medium text-white font-display group-hover:text-orange-400 transition-colors">Obstructed View</h4>
+<p class="text-xs text-slate-500">Cam-12 reporting 80% visibility.</p>
+</div>
+</div>
+<!-- Standard Item -->
+<div class="bg-white/5 border border-white/10 p-3 rounded hover:bg-white/10 transition-colors cursor-pointer group opacity-70">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-primary font-bold border border-primary/30 px-1 rounded">INFO</span>
+<span class="text-[10px] font-mono text-slate-400">10:35:01</span>
+</div>
+<h4 class="text-sm font-medium text-white font-display group-hover:text-primary transition-colors">Shift Change</h4>
+<p class="text-xs text-slate-500">Operator B. Wayne logged off.</p>
+</div>
+</div>
+<!-- Standard Item -->
+<div class="bg-white/5 border border-white/10 p-3 rounded hover:bg-white/10 transition-colors cursor-pointer group opacity-50">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-primary font-bold border border-primary/30 px-1 rounded">INFO</span>
+<span class="text-[10px] font-mono text-slate-400">10:30:00</span>
+</div>
+<h4 class="text-sm font-medium text-white font-display group-hover:text-primary transition-colors">Daily Report Generated</h4>
+<p class="text-xs text-slate-500">Available in Analytics module.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

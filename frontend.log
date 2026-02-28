@@ -1,0 +1,482 @@
+ng-frontend  | 
+ng-frontend  | > frontend@0.0.0 dev
+ng-frontend  | > vite --host 0.0.0.0 --port 3000
+ng-frontend  | 
+ng-frontend  | 
+ng-frontend  |   VITE v7.3.1  ready in 141 ms
+ng-frontend  | 
+ng-frontend  |   ➜  Local:   http://localhost:3000/
+ng-frontend  |   ➜  Network: http://172.18.0.6:3000/
+ng-frontend  | 2:23:38 PM [vite] Internal server error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  |       at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/config.js:28999:43)
+ng-frontend  |       at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/config.js:28996:14)
+ng-frontend  |       at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/config.js:27119:18)
+ng-frontend  |       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ng-frontend  |       at async file:///app/node_modules/vite/dist/node/chunks/config.js:27177:32
+ng-frontend  |       at async Promise.all (index 2)
+ng-frontend  |       at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:27145:4)
+ng-frontend  |       at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:28797:14)
+ng-frontend  |       at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/config.js:22670:26)
+ng-frontend  | 2:23:38 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  | 2:23:38 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/router.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/router.tsx:1:52
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import { createBrowserRouter, RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                                       ^
+ng-frontend  |   3  |  import { MainLayout } from "./layout/MainLayout";
+ng-frontend  |   4  |  import { Dashboard } from "./pages/Dashboard";
+ng-frontend  | 2:23:38 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/MainLayout.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/MainLayout.tsx:2:23
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Outlet } from "react-router-dom";
+ng-frontend  |      |                          ^
+ng-frontend  |   4  |  import { Header } from "./Header";
+ng-frontend  |   5  |  import { Sidebar } from "./Sidebar";
+ng-frontend  | 2:23:38 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";
+ng-frontend  | 2:23:38 PM [vite] (client) Pre-transform error: Failed to resolve import "lucide-react" from "src/layout/Header.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Header.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Shield, Search } from "lucide-react";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  export const Header = () => {
+ng-frontend  |   5  |    return /* @__PURE__ */ jsxDEV("header", { className: "h-16 border-b border-primary/20 bg-background-dark/80 backdro...
+ng-frontend  | 2:23:38 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/Sidebar.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Sidebar.tsx:2:24
+ng-frontend  |   1  |  import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { NavLink } from "react-router-dom";
+ng-frontend  |      |                           ^
+ng-frontend  |   4  |  import { LayoutDashboard, Map, Table, LineChart, Settings } from "lucide-react";
+ng-frontend  |   5  |  import { clsx } from "clsx";
+ng-frontend  | 2:23:39 PM [vite] Internal server error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  |       at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/config.js:28999:43)
+ng-frontend  |       at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/config.js:28996:14)
+ng-frontend  |       at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/config.js:27119:18)
+ng-frontend  |       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ng-frontend  |       at async file:///app/node_modules/vite/dist/node/chunks/config.js:27177:32
+ng-frontend  |       at async Promise.all (index 2)
+ng-frontend  |       at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:27145:4)
+ng-frontend  |       at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:28797:14)
+ng-frontend  |       at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/config.js:22670:26)
+ng-frontend  |       at async viteTransformMiddleware (file:///app/node_modules/vite/dist/node/chunks/config.js:24542:20)
+ng-frontend  | 2:23:39 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/router.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/router.tsx:1:52
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import { createBrowserRouter, RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                                       ^
+ng-frontend  |   3  |  import { MainLayout } from "./layout/MainLayout";
+ng-frontend  |   4  |  import { Dashboard } from "./pages/Dashboard";
+ng-frontend  | 2:23:39 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";
+ng-frontend  | 2:23:39 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/MainLayout.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/MainLayout.tsx:2:23
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Outlet } from "react-router-dom";
+ng-frontend  |      |                          ^
+ng-frontend  |   4  |  import { Header } from "./Header";
+ng-frontend  |   5  |  import { Sidebar } from "./Sidebar";
+ng-frontend  | 2:23:39 PM [vite] (client) Pre-transform error: Failed to resolve import "lucide-react" from "src/layout/Header.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Header.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Shield, Search } from "lucide-react";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  export const Header = () => {
+ng-frontend  |   5  |    return /* @__PURE__ */ jsxDEV("header", { className: "h-16 border-b border-primary/20 bg-background-dark/80 backdro...
+ng-frontend  | 2:23:39 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/Sidebar.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Sidebar.tsx:2:24
+ng-frontend  |   1  |  import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { NavLink } from "react-router-dom";
+ng-frontend  |      |                           ^
+ng-frontend  |   4  |  import { LayoutDashboard, Map, Table, LineChart, Settings } from "lucide-react";
+ng-frontend  |   5  |  import { clsx } from "clsx";
+ng-frontend  | 2:23:48 PM [vite] Internal server error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  |       at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/config.js:28999:43)
+ng-frontend  |       at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/config.js:28996:14)
+ng-frontend  |       at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/config.js:27119:18)
+ng-frontend  |       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ng-frontend  |       at async file:///app/node_modules/vite/dist/node/chunks/config.js:27177:32
+ng-frontend  |       at async Promise.all (index 2)
+ng-frontend  |       at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:27145:4)
+ng-frontend  |       at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:28797:14)
+ng-frontend  |       at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/config.js:22670:26)
+ng-frontend  |       at async viteTransformMiddleware (file:///app/node_modules/vite/dist/node/chunks/config.js:24542:20)
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/router.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/router.tsx:1:52
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import { createBrowserRouter, RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                                       ^
+ng-frontend  |   3  |  import { MainLayout } from "./layout/MainLayout";
+ng-frontend  |   4  |  import { Dashboard } from "./pages/Dashboard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/MainLayout.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/MainLayout.tsx:2:23
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Outlet } from "react-router-dom";
+ng-frontend  |      |                          ^
+ng-frontend  |   4  |  import { Header } from "./Header";
+ng-frontend  |   5  |  import { Sidebar } from "./Sidebar";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "lucide-react" from "src/layout/Header.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Header.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Shield, Search } from "lucide-react";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  export const Header = () => {
+ng-frontend  |   5  |    return /* @__PURE__ */ jsxDEV("header", { className: "h-16 border-b border-primary/20 bg-background-dark/80 backdro...
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/Sidebar.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Sidebar.tsx:2:24
+ng-frontend  |   1  |  import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { NavLink } from "react-router-dom";
+ng-frontend  |      |                           ^
+ng-frontend  |   4  |  import { LayoutDashboard, Map, Table, LineChart, Settings } from "lucide-react";
+ng-frontend  |   5  |  import { clsx } from "clsx";
+ng-frontend  | 2:23:48 PM [vite] Internal server error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  |       at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/config.js:28999:43)
+ng-frontend  |       at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/config.js:28996:14)
+ng-frontend  |       at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/config.js:27119:18)
+ng-frontend  |       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ng-frontend  |       at async file:///app/node_modules/vite/dist/node/chunks/config.js:27177:32
+ng-frontend  |       at async Promise.all (index 2)
+ng-frontend  |       at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:27145:4)
+ng-frontend  |       at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:28797:14)
+ng-frontend  |       at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/config.js:22670:26)
+ng-frontend  |       at async viteTransformMiddleware (file:///app/node_modules/vite/dist/node/chunks/config.js:24542:20)
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/router.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/router.tsx:1:52
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import { createBrowserRouter, RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                                       ^
+ng-frontend  |   3  |  import { MainLayout } from "./layout/MainLayout";
+ng-frontend  |   4  |  import { Dashboard } from "./pages/Dashboard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/MainLayout.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/MainLayout.tsx:2:23
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Outlet } from "react-router-dom";
+ng-frontend  |      |                          ^
+ng-frontend  |   4  |  import { Header } from "./Header";
+ng-frontend  |   5  |  import { Sidebar } from "./Sidebar";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "lucide-react" from "src/layout/Header.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Header.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Shield, Search } from "lucide-react";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  export const Header = () => {
+ng-frontend  |   5  |    return /* @__PURE__ */ jsxDEV("header", { className: "h-16 border-b border-primary/20 bg-background-dark/80 backdro...
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/Sidebar.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Sidebar.tsx:2:24
+ng-frontend  |   1  |  import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { NavLink } from "react-router-dom";
+ng-frontend  |      |                           ^
+ng-frontend  |   4  |  import { LayoutDashboard, Map, Table, LineChart, Settings } from "lucide-react";
+ng-frontend  |   5  |  import { clsx } from "clsx";
+ng-frontend  | 2:23:48 PM [vite] Internal server error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  |       at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/config.js:28999:43)
+ng-frontend  |       at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/config.js:28996:14)
+ng-frontend  |       at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/config.js:27119:18)
+ng-frontend  |       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ng-frontend  |       at async file:///app/node_modules/vite/dist/node/chunks/config.js:27177:32
+ng-frontend  |       at async Promise.all (index 2)
+ng-frontend  |       at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:27145:4)
+ng-frontend  |       at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:28797:14)
+ng-frontend  |       at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/config.js:22670:26)
+ng-frontend  |       at async viteTransformMiddleware (file:///app/node_modules/vite/dist/node/chunks/config.js:24542:20)
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/router.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/router.tsx:1:52
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import { createBrowserRouter, RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                                       ^
+ng-frontend  |   3  |  import { MainLayout } from "./layout/MainLayout";
+ng-frontend  |   4  |  import { Dashboard } from "./pages/Dashboard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/MainLayout.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/MainLayout.tsx:2:23
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Outlet } from "react-router-dom";
+ng-frontend  |      |                          ^
+ng-frontend  |   4  |  import { Header } from "./Header";
+ng-frontend  |   5  |  import { Sidebar } from "./Sidebar";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/Sidebar.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Sidebar.tsx:2:24
+ng-frontend  |   1  |  import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { NavLink } from "react-router-dom";
+ng-frontend  |      |                           ^
+ng-frontend  |   4  |  import { LayoutDashboard, Map, Table, LineChart, Settings } from "lucide-react";
+ng-frontend  |   5  |  import { clsx } from "clsx";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "lucide-react" from "src/layout/Header.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Header.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Shield, Search } from "lucide-react";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  export const Header = () => {
+ng-frontend  |   5  |    return /* @__PURE__ */ jsxDEV("header", { className: "h-16 border-b border-primary/20 bg-background-dark/80 backdro...
+ng-frontend  | 2:23:48 PM [vite] Internal server error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  |       at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/config.js:28999:43)
+ng-frontend  |       at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/config.js:28996:14)
+ng-frontend  |       at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/config.js:27119:18)
+ng-frontend  |       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ng-frontend  |       at async file:///app/node_modules/vite/dist/node/chunks/config.js:27177:32
+ng-frontend  |       at async Promise.all (index 2)
+ng-frontend  |       at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:27145:4)
+ng-frontend  |       at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:28797:14)
+ng-frontend  |       at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/config.js:22670:26)
+ng-frontend  |       at async viteTransformMiddleware (file:///app/node_modules/vite/dist/node/chunks/config.js:24542:20)
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/router.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/router.tsx:1:52
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import { createBrowserRouter, RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                                       ^
+ng-frontend  |   3  |  import { MainLayout } from "./layout/MainLayout";
+ng-frontend  |   4  |  import { Dashboard } from "./pages/Dashboard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/MainLayout.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/MainLayout.tsx:2:23
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Outlet } from "react-router-dom";
+ng-frontend  |      |                          ^
+ng-frontend  |   4  |  import { Header } from "./Header";
+ng-frontend  |   5  |  import { Sidebar } from "./Sidebar";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "lucide-react" from "src/layout/Header.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Header.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Shield, Search } from "lucide-react";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  export const Header = () => {
+ng-frontend  |   5  |    return /* @__PURE__ */ jsxDEV("header", { className: "h-16 border-b border-primary/20 bg-background-dark/80 backdro...
+ng-frontend  | 2:23:48 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/Sidebar.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Sidebar.tsx:2:24
+ng-frontend  |   1  |  import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { NavLink } from "react-router-dom";
+ng-frontend  |      |                           ^
+ng-frontend  |   4  |  import { LayoutDashboard, Map, Table, LineChart, Settings } from "lucide-react";
+ng-frontend  |   5  |  import { clsx } from "clsx";
+ng-frontend  | 2:23:49 PM [vite] Internal server error: Failed to resolve import "react-router-dom" from "src/App.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/App.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  import { router } from "./router";
+ng-frontend  |   5  |  function App() {
+ng-frontend  |       at TransformPluginContext._formatLog (file:///app/node_modules/vite/dist/node/chunks/config.js:28999:43)
+ng-frontend  |       at TransformPluginContext.error (file:///app/node_modules/vite/dist/node/chunks/config.js:28996:14)
+ng-frontend  |       at normalizeUrl (file:///app/node_modules/vite/dist/node/chunks/config.js:27119:18)
+ng-frontend  |       at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ng-frontend  |       at async file:///app/node_modules/vite/dist/node/chunks/config.js:27177:32
+ng-frontend  |       at async Promise.all (index 2)
+ng-frontend  |       at async TransformPluginContext.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:27145:4)
+ng-frontend  |       at async EnvironmentPluginContainer.transform (file:///app/node_modules/vite/dist/node/chunks/config.js:28797:14)
+ng-frontend  |       at async loadAndTransform (file:///app/node_modules/vite/dist/node/chunks/config.js:22670:26)
+ng-frontend  |       at async viteTransformMiddleware (file:///app/node_modules/vite/dist/node/chunks/config.js:24542:20)
+ng-frontend  | 2:23:49 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/router.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/router.tsx:1:52
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import { createBrowserRouter, RouterProvider } from "react-router-dom";
+ng-frontend  |      |                                                       ^
+ng-frontend  |   3  |  import { MainLayout } from "./layout/MainLayout";
+ng-frontend  |   4  |  import { Dashboard } from "./pages/Dashboard";
+ng-frontend  | 2:23:49 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/MainLayout.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/MainLayout.tsx:2:23
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Outlet } from "react-router-dom";
+ng-frontend  |      |                          ^
+ng-frontend  |   4  |  import { Header } from "./Header";
+ng-frontend  |   5  |  import { Sidebar } from "./Sidebar";
+ng-frontend  | 2:23:49 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";
+ng-frontend  | 2:23:49 PM [vite] (client) Pre-transform error: Failed to resolve import "react-router-dom" from "src/layout/Sidebar.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Sidebar.tsx:2:24
+ng-frontend  |   1  |  import { Fragment, jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { NavLink } from "react-router-dom";
+ng-frontend  |      |                           ^
+ng-frontend  |   4  |  import { LayoutDashboard, Map, Table, LineChart, Settings } from "lucide-react";
+ng-frontend  |   5  |  import { clsx } from "clsx";
+ng-frontend  | 2:23:49 PM [vite] (client) Pre-transform error: Failed to resolve import "lucide-react" from "src/layout/Header.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/layout/Header.tsx:2:31
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Shield, Search } from "lucide-react";
+ng-frontend  |      |                                  ^
+ng-frontend  |   4  |  export const Header = () => {
+ng-frontend  |   5  |    return /* @__PURE__ */ jsxDEV("header", { className: "h-16 border-b border-primary/20 bg-background-dark/80 backdro...
+ng-frontend  | npm error path /app
+ng-frontend  | npm error command failed
+ng-frontend  | npm error signal SIGTERM
+ng-frontend  | npm error command sh -c vite --host 0.0.0.0 --port 3000
+ng-frontend  | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-28T14_23_34_009Z-debug-0.log
+ng-frontend  | 
+ng-frontend  | > frontend@0.0.0 dev
+ng-frontend  | > vite --host 0.0.0.0 --port 3000
+ng-frontend  | 
+ng-frontend  | 3:46:45 PM [vite] (client) Re-optimizing dependencies because lockfile has changed
+ng-frontend  | 
+ng-frontend  |   VITE v7.3.1  ready in 141 ms
+ng-frontend  | 
+ng-frontend  |   ➜  Local:   http://localhost:3000/
+ng-frontend  |   ➜  Network: http://172.18.0.6:3000/
+ng-frontend  | 3:46:48 PM [vite] (client) Pre-transform error: Failed to resolve import "../../components/ui/Badge" from "src/pages/Dashboard.tsx". Does the file exist?
+ng-frontend  |   Plugin: vite:import-analysis
+ng-frontend  |   File: /app/src/pages/Dashboard.tsx:2:22
+ng-frontend  |   1  |  import { jsxDEV } from "react/jsx-dev-runtime";
+ng-frontend  |   2  |  import React from "react";
+ng-frontend  |   3  |  import { Badge } from "../../components/ui/Badge";
+ng-frontend  |      |                         ^
+ng-frontend  |   4  |  import { Button } from "../../components/ui/Button";
+ng-frontend  |   5  |  import { ViolationCard } from "../../components/cards/ViolationCard";

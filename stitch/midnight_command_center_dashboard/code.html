@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neon Guardian - Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#06e8f9",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0b1215", // Deep midnight black
+                        "surface-dark": "#121e23", // Slightly lighter for cards
+                        "surface-highlight": "#1a2c32", // Highlight state
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(6, 232, 249, 0.3), 0 0 20px rgba(6, 232, 249, 0.1)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1215; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a2c32; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #233b42; 
+        }
+        
+        .glass-panel {
+            background: rgba(18, 30, 35, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen overflow-hidden selection:bg-primary selection:text-black">
+<div class="flex h-screen w-full overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 flex-shrink-0 border-r border-white/10 bg-surface-dark flex flex-col justify-between h-full z-20">
+<div class="flex flex-col gap-6 p-4 h-full overflow-y-auto">
+<!-- Branding -->
+<div class="flex items-center gap-3 px-2 py-2">
+<div class="relative flex items-center justify-center size-10 rounded-full bg-primary/10 shadow-neon">
+<span class="material-symbols-outlined text-primary text-2xl">security</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-bold tracking-wide">Neon Guardian</h1>
+<p class="text-slate-400 text-xs font-medium">Command Center v2.4</p>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl bg-primary/20 border border-primary/20 shadow-[0_0_15px_rgba(6,232,249,0.1)] transition-all" href="#">
+<span class="material-symbols-outlined text-primary">dashboard</span>
+<span class="text-primary text-sm font-bold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-highlight text-slate-400 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">videocam</span>
+<span class="text-sm font-medium">Live Feeds</span>
+<span class="ml-auto bg-red-500/20 text-red-400 text-[10px] font-bold px-1.5 py-0.5 rounded">LIVE</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-highlight text-slate-400 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">warning</span>
+<span class="text-sm font-medium">Violations</span>
+<span class="ml-auto bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">12</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-highlight text-slate-400 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">bar_chart</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-highlight text-slate-400 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">videocam_off</span>
+<span class="text-sm font-medium">Camera Mgmt</span>
+</a>
+<div class="my-2 border-t border-white/5 mx-3"></div>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-highlight text-slate-400 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-surface-highlight text-slate-400 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">health_and_safety</span>
+<span class="text-sm font-medium">System Health</span>
+</a>
+</nav>
+</div>
+<!-- User Footer -->
+<div class="p-4 border-t border-white/5">
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm font-medium">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- Background Glow Effect -->
+<div class="absolute top-[-20%] left-[20%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- Top Header -->
+<header class="flex items-center justify-between px-8 py-6 z-10">
+<div>
+<h2 class="text-3xl font-black text-white tracking-tight">Command Center</h2>
+<p class="text-primary/60 text-sm font-medium mt-1 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        Real-time Traffic Monitoring System
+                    </p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-dark border border-white/10">
+<span class="material-symbols-outlined text-slate-400 text-sm">calendar_today</span>
+<span class="text-slate-300 text-sm font-medium">Oct 24, 2023</span>
+<span class="w-px h-4 bg-white/10 mx-2"></span>
+<span class="text-primary text-sm font-bold">23:42:15</span>
+</div>
+<button class="flex items-center justify-center gap-2 h-10 px-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-lg text-sm font-bold transition-all shadow-[0_0_10px_rgba(6,232,249,0.15)] hover:shadow-[0_0_20px_rgba(6,232,249,0.25)]">
+<span class="material-symbols-outlined text-lg">download</span>
+                        Export Report
+                    </button>
+<button class="flex items-center justify-center size-10 rounded-full bg-surface-dark hover:bg-surface-highlight text-white border border-white/10 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-surface-dark"></span>
+</button>
+</div>
+</header>
+<!-- Scrollable Dashboard Content -->
+<div class="flex-1 overflow-y-auto px-8 pb-8 z-10 scroll-smooth">
+<!-- KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<!-- Total Violations -->
+<div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-white">warning</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-2">Total Violations Today</p>
+<div class="flex items-baseline gap-3">
+<h3 class="text-4xl font-bold text-white">1,248</h3>
+<span class="text-emerald-400 text-sm font-bold bg-emerald-400/10 px-2 py-0.5 rounded flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                                +5.2%
+                            </span>
+</div>
+<div class="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-emerald-500 to-primary w-[70%] h-full rounded-full"></div>
+</div>
+</div>
+<!-- Active Cameras -->
+<div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-white">videocam</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-2">Active Camera Nodes</p>
+<div class="flex items-baseline gap-3">
+<h3 class="text-4xl font-bold text-white">42<span class="text-slate-500 text-2xl font-normal">/45</span></h3>
+<span class="text-emerald-400 text-sm font-bold bg-emerald-400/10 px-2 py-0.5 rounded flex items-center">
+                                +2
+                            </span>
+</div>
+<div class="flex gap-1 mt-4">
+<div class="h-1 flex-1 bg-emerald-500 rounded-full"></div>
+<div class="h-1 flex-1 bg-emerald-500 rounded-full"></div>
+<div class="h-1 flex-1 bg-emerald-500 rounded-full"></div>
+<div class="h-1 flex-1 bg-slate-700 rounded-full"></div>
+</div>
+</div>
+<!-- AI Confidence -->
+<div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-white">psychology</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-2">AI Confidence</p>
+<div class="flex items-baseline gap-3">
+<h3 class="text-4xl font-bold text-white">99.8%</h3>
+<span class="text-orange-400 text-sm font-bold bg-orange-400/10 px-2 py-0.5 rounded flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">trending_down</span>
+                                -0.1%
+                            </span>
+</div>
+<div class="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
+<div class="bg-primary w-[99%] h-full rounded-full shadow-[0_0_10px_#06e8f9]"></div>
+</div>
+</div>
+<!-- System Load -->
+<div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-white">memory</span>
+</div>
+<p class="text-slate-400 text-sm font-medium mb-2">System Load</p>
+<div class="flex items-baseline gap-3">
+<h3 class="text-4xl font-bold text-white">12%</h3>
+<span class="text-slate-400 text-sm font-medium bg-white/5 px-2 py-0.5 rounded">Stable</span>
+</div>
+<div class="mt-4 flex items-end gap-1 h-2 w-full">
+<div class="w-1/6 bg-primary h-[30%] rounded-sm"></div>
+<div class="w-1/6 bg-primary h-[50%] rounded-sm"></div>
+<div class="w-1/6 bg-primary h-[40%] rounded-sm"></div>
+<div class="w-1/6 bg-primary h-[80%] rounded-sm"></div>
+<div class="w-1/6 bg-primary h-[60%] rounded-sm"></div>
+<div class="w-1/6 bg-primary h-[45%] rounded-sm"></div>
+</div>
+</div>
+</div>
+<!-- Main Section: Live Feed & Recent List -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+<!-- Live Surveillance Feed -->
+<div class="lg:col-span-2 glass-panel rounded-2xl flex flex-col p-1 border border-primary/20 shadow-[0_0_30px_rgba(6,232,249,0.05)]">
+<div class="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-surface-dark/50 rounded-t-xl">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></div>
+<h3 class="text-white font-bold tracking-wide">Live Feed: Downtown Intersection A4</h3>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 rounded bg-white/5 hover:bg-white/10 text-white transition">
+<span class="material-symbols-outlined text-sm">zoom_in</span>
+</button>
+<button class="p-1.5 rounded bg-white/5 hover:bg-white/10 text-white transition">
+<span class="material-symbols-outlined text-sm">fullscreen</span>
+</button>
+</div>
+</div>
+<div class="relative flex-1 bg-black overflow-hidden rounded-b-xl group">
+<!-- Video Placeholder -->
+<div class="absolute inset-0 bg-cover bg-center opacity-80" data-alt="Night time city traffic view from above with car lights blurring" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCu0XsW_sDHw9INk0MXWjbb7ktfKerrSPt1uHxX8EhAHdQD47chZ1ygKc_z0OdCQUAJyoWXRU8mIweOUCZdi9ZldvxHdzZI8pexahiMWAFYk6Z9py6OXr7QJhIBuhJQW6fGo7kHM4IGABTekW-MMBXHWnGMW7KI8tyrZjzPEKK8Pm-7ikQByanpej0lVfORbDLMOlUNzVaGL53trOnUks0YqmRVooc7IXZZ6mxkcdsawMxYBl-931F8MJujxB6CfFsjxiHvLUanXzdE');"></div>
+<!-- AI Overlay UI -->
+<div class="absolute inset-0 pointer-events-none">
+<!-- Bounding Box Example 1 -->
+<div class="absolute top-[30%] left-[20%] w-[120px] h-[80px] border-2 border-primary/70 rounded bg-primary/5 flex flex-col justify-between p-1">
+<div class="bg-primary text-black text-[9px] font-bold px-1 self-start">CAR: 98%</div>
+<div class="text-primary text-[9px] self-end">45 KM/H</div>
+</div>
+<!-- Bounding Box Example 2 (Violation) -->
+<div class="absolute top-[45%] right-[30%] w-[140px] h-[90px] border-2 border-red-500 rounded bg-red-500/10 flex flex-col justify-between p-1 animate-pulse">
+<div class="bg-red-500 text-white text-[9px] font-bold px-1 self-start">SPEEDING</div>
+<div class="text-red-500 text-[9px] font-bold self-end">82 KM/H</div>
+</div>
+<!-- Scan Line Animation -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/10 to-transparent h-[20%] w-full animate-[scan_3s_linear_infinite] opacity-30"></div>
+</div>
+<!-- Bottom Controls -->
+<div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<div class="flex gap-4 text-xs font-mono text-primary/80">
+<span>LAT: 40.7128 N</span>
+<span>LNG: 74.0060 W</span>
+<span>ISO: 800</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Violations Feed -->
+<div class="glass-panel rounded-2xl flex flex-col overflow-hidden h-full">
+<div class="px-5 py-4 border-b border-white/5 flex justify-between items-center bg-surface-dark/50">
+<h3 class="text-white font-bold">Recent Violations</h3>
+<button class="text-xs text-primary font-medium hover:underline">View All</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+<!-- Item 1 -->
+<div class="p-3 rounded-lg bg-surface-highlight border border-white/5 flex gap-3 items-center group hover:border-primary/30 transition-all cursor-pointer">
+<div class="w-16 h-12 rounded bg-cover bg-center relative overflow-hidden" data-alt="Red sports car speeding on a highway" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCq_zg3by-jULALKPkvzCoUOcKMSmb2UmM8ZGYfXApvcQj3m8x0HWtJcg_34qS6tqF3W-cp1fW56A3_ON1_kgkwvt3XwEd1PRrMh3hJRXA3hHSzWulewu6--8SdJ-UgQvwstpZlQBm5zE3bmM-lY1vLaknYm6d9j9otPJ7mWi3T9J9kYnZuwCtye8yHAgBOFsDFOFpNevwR3R3xoP68I40letVPDoMYn8Qixc6pUqU9WIljgZ1VUTS9g1hJdtci0qsaLzd_fDmAQ6tV');">
+<div class="absolute inset-0 bg-red-500/20"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<h4 class="text-white text-sm font-bold truncate">Speeding (Zone B)</h4>
+<span class="text-[10px] text-slate-400">2m ago</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-xs text-slate-400">Lic: K29-391</p>
+<span class="text-[10px] font-bold text-red-400 bg-red-900/30 px-1.5 py-0.5 rounded border border-red-500/20">CRITICAL</span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-3 rounded-lg bg-surface-dark border border-white/5 flex gap-3 items-center group hover:border-primary/30 transition-all cursor-pointer">
+<div class="w-16 h-12 rounded bg-cover bg-center relative overflow-hidden" data-alt="White van running a red light at an intersection" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDN6Zf4kWUel5Ld8W5R2Hy_ZQS_g1fSGSoNgvtADoeThGr-sKY0aLr7LQEx-kXsbHG_QCSBMnJ9zOKW8-aPmfuKj6HGlqiB-oVu5MzmWWG4y-_w1HEVX6YHnJYWsmn5QUOJKqPPPq0VBDA1IM6_X6SlkZc0eKAULVmQljaw1WpcWeI12-h5o37bXo-7jraXKF0LkxrafsGhjBQ9_MvRdDNaBhgXoEvhVT1UPD_poIttXCZ1HVxz-3wV8OLlc81TxZGhY-wL9DhyDLV1');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<h4 class="text-white text-sm font-bold truncate">Red Light Run</h4>
+<span class="text-[10px] text-slate-400">14m ago</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-xs text-slate-400">Lic: 8XJ-221</p>
+<span class="text-[10px] font-bold text-orange-400 bg-orange-900/30 px-1.5 py-0.5 rounded border border-orange-500/20">HIGH</span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-3 rounded-lg bg-surface-dark border border-white/5 flex gap-3 items-center group hover:border-primary/30 transition-all cursor-pointer">
+<div class="w-16 h-12 rounded bg-cover bg-center relative overflow-hidden" data-alt="Car parked illegally in a no parking zone" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBQd08mbHMItonk_2vKA2FjSXBfqT7Va4I9gz6IUIocTawnRAViQTo1SZmCB1wmBgTheQ0F6rK2H2XdqVwaH2EJ-chz7Ing1b9MM5SUgg2HSf48VVIZPY-aCm88fo5rQymHOA34_VnGzeFE2jPRJ_XcNpgL4VfkCX-thkKrolO9o8hNIzqi4wJTVi4c5vf4KjUPVdUwurSlNwZI6s3J3MybKe6-wniXtD8NVArPDXIzG4kiL6QDpPG2MGPqmPGrbPa3wbMX8oIqlh-X');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<h4 class="text-white text-sm font-bold truncate">Illegal Parking</h4>
+<span class="text-[10px] text-slate-400">28m ago</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-xs text-slate-400">Lic: M92-001</p>
+<span class="text-[10px] font-bold text-yellow-400 bg-yellow-900/30 px-1.5 py-0.5 rounded border border-yellow-500/20">MEDIUM</span>
+</div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="p-3 rounded-lg bg-surface-dark border border-white/5 flex gap-3 items-center group hover:border-primary/30 transition-all cursor-pointer">
+<div class="w-16 h-12 rounded bg-cover bg-center relative overflow-hidden" data-alt="Blurry image of a motorcycle changing lanes dangerously" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCcZGpB6nhWLg92XHkSV-9qg96agaELGMzwiFX92FSN7EI_v_5eKjpLGfckc8AC1-CALkvRsuWK_AuQakVswfmvKvRH1ZDNGqicHnajSgG1MClv7qXxbI4EDbpTEw_NAZ7vy3bx5JDosnkeSbTKSpV2M9VpMS-reN2trOnY7lXXCReSJNfROTKTRq7MKJAnYLMFDanfz0kqtTfrrquHbNAm6FhGF-V8uL-Mm_rad238M30sxSKdvlecTlNG4vNg3hKIi5l8acKKCUU5');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<h4 class="text-white text-sm font-bold truncate">Reckless Driving</h4>
+<span class="text-[10px] text-slate-400">41m ago</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-xs text-slate-400">Lic: UNK-22</p>
+<span class="text-[10px] font-bold text-red-400 bg-red-900/30 px-1.5 py-0.5 rounded border border-red-500/20">CRITICAL</span>
+</div>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="p-3 rounded-lg bg-surface-dark border border-white/5 flex gap-3 items-center group hover:border-primary/30 transition-all cursor-pointer">
+<div class="w-16 h-12 rounded bg-cover bg-center relative overflow-hidden" data-alt="Car driving in the wrong direction on a one-way street" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBCt1qE0nppXgKiMdTGYpKJycUAMmn-AQOorHa6rJG0n3Md9u23oxKZzCkKkXaT0wUBaGnABfJrvzGsDPMXMHhxALL619JSevaCg6eb5tr9AAnpFmg17vWaGvHOkJdBAD_35wVYwRThhfUFZR-O2pAmdBKt0VTJms9HNpSGGHHkqDmfmkuKzBSsxI0YCtCn-ekR0fvYsB-aOigi0ZMF4txODXwqju8_Zrn2rQbIao2nf-hmy7lrKs70n_h-Nd73Mri9zuXrASpFvHMP');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<h4 class="text-white text-sm font-bold truncate">Wrong Way</h4>
+<span class="text-[10px] text-slate-400">1h ago</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-xs text-slate-400">Lic: P55-102</p>
+<span class="text-[10px] font-bold text-orange-400 bg-orange-900/30 px-1.5 py-0.5 rounded border border-orange-500/20">HIGH</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Stats / Map Placeholder -->
+<div class="mt-6 glass-panel rounded-2xl p-6 border border-white/5 flex flex-col md:flex-row gap-6">
+<div class="flex-1 flex flex-col gap-4">
+<h3 class="text-white font-bold text-lg">System Health &amp; Nodes</h3>
+<div class="bg-surface-dark rounded-xl border border-white/5 h-48 w-full relative overflow-hidden">
+<!-- Abstract Map Background -->
+<div class="absolute inset-0 bg-cover bg-center opacity-40 grayscale" data-alt="Dark map of city streets with glowing nodes" data-location="New York City" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_dkPPpe4C2z8hffLYHlo0GkfeZV3iVEYPA6i6E3iP2rowOWBhR929E874aL5zuvCZXovsXYtlrRMQ3YmPsClonUpsNTJMQDJZ7rsUA0ZTMc4WklRVnwXZrlQFt3mX8fZUA4ZHOtyIOnt2n_RiTRCv5kvuLKVQi_0u5qbzj72IiWjUhNqdR4MNX-FP9SWoFnt0ohRJ1AZHnS079fpiPNfQKPKiMkF_Yd2qKiQpwlZOWqwnZu2f39azaMttpMxV9pxX2i_fxj1YTzoN');"></div>
+<!-- Map Nodes -->
+<div class="absolute top-[30%] left-[40%] size-3 bg-green-500 rounded-full shadow-[0_0_10px_#22c55e] animate-pulse"></div>
+<div class="absolute top-[60%] left-[20%] size-3 bg-green-500 rounded-full shadow-[0_0_10px_#22c55e]"></div>
+<div class="absolute top-[45%] left-[70%] size-3 bg-green-500 rounded-full shadow-[0_0_10px_#22c55e]"></div>
+<div class="absolute top-[20%] left-[60%] size-3 bg-red-500 rounded-full shadow-[0_0_10px_red] animate-ping"></div>
+<div class="absolute top-[20%] left-[60%] size-3 bg-red-500 rounded-full shadow-[0_0_10px_red]"></div>
+<div class="absolute bottom-3 left-3 bg-black/80 px-2 py-1 rounded text-xs text-slate-300 backdrop-blur-sm">
+                                Node Status: <span class="text-green-400">42 Online</span>, <span class="text-red-400">3 Offline</span>
+</div>
+</div>
+</div>
+<div class="w-full md:w-1/3 flex flex-col gap-4">
+<h3 class="text-white font-bold text-lg">Server Status</h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs text-slate-400 mb-1">
+<span>CPU Usage</span>
+<span class="text-primary font-bold">42%</span>
+</div>
+<div class="h-2 bg-surface-dark rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[42%] rounded-full shadow-[0_0_8px_rgba(6,232,249,0.5)]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs text-slate-400 mb-1">
+<span>Memory Allocation</span>
+<span class="text-purple-400 font-bold">68%</span>
+</div>
+<div class="h-2 bg-surface-dark rounded-full overflow-hidden">
+<div class="h-full bg-purple-500 w-[68%] rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs text-slate-400 mb-1">
+<span>Storage (Rec)</span>
+<span class="text-blue-400 font-bold">81%</span>
+</div>
+<div class="h-2 bg-surface-dark rounded-full overflow-hidden">
+<div class="h-full bg-blue-500 w-[81%] rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mt-2">
+<div class="bg-surface-dark p-3 rounded-lg border border-white/5">
+<div class="text-[10px] text-slate-500 uppercase tracking-wider">Latency</div>
+<div class="text-white text-lg font-bold">24ms</div>
+</div>
+<div class="bg-surface-dark p-3 rounded-lg border border-white/5">
+<div class="text-[10px] text-slate-500 uppercase tracking-wider">Uptime</div>
+<div class="text-white text-lg font-bold">14d 2h</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<style>
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(500%); }
+        }
+    </style>
+</body></html>

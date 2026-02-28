@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ng-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: neonguardian
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ng-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d neonguardian"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ng-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ng-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ng-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpassword@postgres:5432/neonguardian?schema=public
+      - REDIS_URL=redis://redis:6379
+      - PORT=5000
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - ng-network
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: ng-ai-service
+    ports:
+      - "8000:8000"
+    environment:
+      - BACKEND_API_URL=http://backend:5000/api
+    depends_on:
+      - backend
+    volumes:
+      - ./ai-service:/app
+    networks:
+      - ng-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ng-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+      - VITE_SOCKET_URL=http://localhost:5000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - ng-network
+
+networks:
+  ng-network:
+    driver: bridge
+
+volumes:
+  pgdata:

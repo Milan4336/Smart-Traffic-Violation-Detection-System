@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neon Guardian - System Updates</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Rajdhani:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06e8f9", // Cyan Neon
+                        "primary-dim": "rgba(6, 232, 249, 0.1)",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#050A14", // Deep Void
+                        "surface-dark": "#0F172A", // Midnight Glass base
+                        "alert": "#FF2A6D", // Laser Red
+                        "success": "#05FFA1", // Electric Green
+                        "warning": "#F59E0B", // Solar Orange
+                    },
+                    fontFamily: {
+                        "display": ["Rajdhani", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    boxShadow: {
+                        "neon": "0 0 10px rgba(6, 232, 249, 0.5), 0 0 20px rgba(6, 232, 249, 0.3)",
+                        "neon-red": "0 0 10px rgba(255, 42, 109, 0.5), 0 0 20px rgba(255, 42, 109, 0.3)",
+                    },
+                    backdropBlur: {
+                        "xs": "2px",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050A14; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155; 
+        }
+
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-underline {
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .input-underline:focus {
+            border-bottom-color: #06e8f9;
+            box-shadow: 0 4px 4px -4px rgba(6, 232, 249, 0.5);
+            outline: none;
+        }
+
+        /* Hexagon Clip Path */
+        .hexagon {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-body antialiased min-h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation (Reused from context) -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 bg-[#050A14] px-10 py-3 shrink-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-white">
+<div class="size-6 text-primary animate-pulse">
+<span class="material-symbols-outlined" style="font-size: 24px;">security</span>
+</div>
+<h2 class="text-white text-xl font-display font-bold leading-tight tracking-wider uppercase">Neon Guardian</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64 group">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-surface-dark border border-white/5 focus-within:border-primary/50 transition-colors">
+<div class="text-[#9bb9bb] flex items-center justify-center pl-3 pr-2">
+<span class="material-symbols-outlined text-lg">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 bg-transparent text-white focus:outline-0 placeholder:text-slate-500 text-sm font-normal" placeholder="Search system..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-6 hidden xl:flex">
+<a class="text-slate-400 hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-slate-400 hover:text-primary text-sm font-medium transition-colors" href="#">Live Monitoring</a>
+<a class="text-slate-400 hover:text-primary text-sm font-medium transition-colors" href="#">Violations</a>
+<a class="text-slate-400 hover:text-primary text-sm font-medium transition-colors" href="#">Analytics</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-0.5" href="#">System Updates</a>
+<a class="text-slate-400 hover:text-primary text-sm font-medium transition-colors" href="#">Admin</a>
+</nav>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-lg size-10 bg-surface-dark text-white hover:bg-white/5 transition-colors border border-white/5 relative">
+<span class="absolute top-2 right-2 size-2 bg-alert rounded-full"></span>
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg size-10 bg-surface-dark text-white hover:bg-white/5 transition-colors border border-white/5">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="size-10 rounded-full border border-primary/30 p-0.5">
+<div class="size-full rounded-full bg-cover bg-center" data-alt="User Avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAD5dOw_Mzw3Sc_15x1DbvwaEi5kbwkudDtgA04h2wOFEg_RJWWV40Rrl8HSkaU6DFjJQhOSwsRllBmQU6NQbWdIK3sw-MS9DXAQKCOV4DbiLUmuzdNswFQL9ieU1TRkXHG4Rq9ZP3PK2lgt1p2hVTGTV3Q2tPVKu0UYwJdCarbIHvOdpRIz3E9Nx7mp0YyCbXbdluo2O6bah0ftq-GGPSKWdGgT8Y2M5G43QDKAjtYepoBNE49otE7G3wELelr1-lrMRs1bhhnQZLL');"></div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex flex-1 overflow-hidden relative">
+<!-- Background Decor -->
+<div class="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px]"></div>
+<!-- Grid Pattern Overlay -->
+<div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(#06e8f9 1px, transparent 1px), linear-gradient(90deg, #06e8f9 1px, transparent 1px); background-size: 40px 40px;"></div>
+</div>
+<div class="flex flex-col lg:flex-row w-full h-full z-10 p-6 gap-6">
+<!-- Left Panel: Publish Console (30%) -->
+<section class="glass-panel w-full lg:w-[350px] xl:w-[400px] flex flex-col rounded-xl overflow-hidden shrink-0 h-full max-h-full">
+<div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">publish</span>
+<h2 class="text-white font-display font-bold text-lg tracking-wider">DEPLOY PATCH</h2>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="size-2 bg-success rounded-full animate-pulse"></div>
+<span class="text-xs font-mono text-success">READY</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+<!-- Update Title -->
+<div class="group">
+<label class="block text-xs font-display font-semibold text-primary/80 uppercase tracking-widest mb-2">Update Title</label>
+<input class="input-underline w-full bg-transparent text-white font-display font-medium text-xl py-2 px-1 placeholder:text-slate-600 focus:ring-0 border-x-0 border-t-0" placeholder="e.g. Neural Net v4 Optimization" type="text" value="Sentry AI Model Patch"/>
+</div>
+<!-- Version & Type Row -->
+<div class="flex gap-4">
+<div class="flex-1 group">
+<label class="block text-xs font-display font-semibold text-primary/80 uppercase tracking-widest mb-2">Version ID</label>
+<div class="relative">
+<span class="absolute left-0 top-2.5 text-slate-500 font-mono text-sm">v</span>
+<input class="input-underline w-full bg-transparent text-white font-mono text-lg py-2 pl-4 pr-1 placeholder:text-slate-600 focus:ring-0 border-x-0 border-t-0" placeholder="0.0.0" type="text" value="2.4.1"/>
+</div>
+</div>
+<div class="flex-1">
+<label class="block text-xs font-display font-semibold text-primary/80 uppercase tracking-widest mb-2">Patch Type</label>
+<select class="w-full bg-surface-dark border border-white/10 rounded-md text-slate-300 text-sm py-2 px-3 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none">
+<option>Feature</option>
+<option>Bug Fix</option>
+<option selected="">Security</option>
+<option>Hotfix</option>
+</select>
+</div>
+</div>
+<!-- Type Visual Selection (Radio) -->
+<div class="space-y-3">
+<label class="block text-xs font-display font-semibold text-slate-400 uppercase tracking-widest">Impact Level</label>
+<div class="grid grid-cols-3 gap-2">
+<label class="cursor-pointer relative">
+<input class="peer sr-only" name="impact" type="radio"/>
+<div class="h-10 flex items-center justify-center rounded border border-white/10 bg-white/5 text-slate-400 text-xs font-display font-bold hover:bg-white/10 peer-checked:border-primary peer-checked:text-primary peer-checked:bg-primary/10 transition-all">
+                                     LOW
+                                 </div>
+</label>
+<label class="cursor-pointer relative">
+<input class="peer sr-only" name="impact" type="radio"/>
+<div class="h-10 flex items-center justify-center rounded border border-white/10 bg-white/5 text-slate-400 text-xs font-display font-bold hover:bg-white/10 peer-checked:border-warning peer-checked:text-warning peer-checked:bg-warning/10 transition-all">
+                                     MED
+                                 </div>
+</label>
+<label class="cursor-pointer relative">
+<input checked="" class="peer sr-only" name="impact" type="radio"/>
+<div class="h-10 flex items-center justify-center rounded border border-white/10 bg-white/5 text-slate-400 text-xs font-display font-bold hover:bg-white/10 peer-checked:border-alert peer-checked:text-alert peer-checked:bg-alert/10 transition-all shadow-[0_0_15px_rgba(255,42,109,0.0)] peer-checked:shadow-[0_0_15px_rgba(255,42,109,0.3)]">
+                                     CRITICAL
+                                 </div>
+</label>
+</div>
+</div>
+<!-- Changelog -->
+<div class="flex-1 flex flex-col">
+<label class="block text-xs font-display font-semibold text-primary/80 uppercase tracking-widest mb-2 flex justify-between">
+<span>Changelog Manifest</span>
+<span class="text-[10px] text-slate-500 font-mono">MARKDOWN SUPPORTED</span>
+</label>
+<div class="relative flex-1">
+<textarea class="w-full h-48 bg-[#020408] border border-white/10 rounded-lg p-4 text-sm font-mono text-slate-300 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none resize-none leading-relaxed" placeholder="// Enter patch notes here...">### Security Patch 2.4.1
+- Patched vulnerability in remote access protocol.
+- Updated encryption keys for data stream.
+- Optimized low-light detection algorithm.
+
+// Deployment
+target: prod-eu-west
+restart_policy: rolling</textarea>
+<div class="absolute bottom-3 right-3 text-[10px] text-slate-600 font-mono">Ln 9, Col 24</div>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-white/10 bg-white/5 mt-auto">
+<button class="group relative w-full h-12 flex items-center justify-center bg-primary/10 hover:bg-primary/20 border border-primary/50 text-primary font-display font-bold text-lg tracking-widest uppercase transition-all overflow-hidden rounded hover:shadow-neon">
+<span class="relative z-10 flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">rocket_launch</span>
+                            Initialize Deploy
+                        </span>
+<!-- Hover Glitch Effect Background -->
+<div class="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+</button>
+<div class="mt-3 flex justify-between items-center text-[10px] text-slate-500 font-mono">
+<span>EST. DOWNTIME: 0s</span>
+<span>AUTH: ADMIN_ROOT</span>
+</div>
+</div>
+</section>
+<!-- Right Panel: Timeline (70%) -->
+<section class="flex-1 glass-panel rounded-xl overflow-hidden flex flex-col relative h-full">
+<!-- Header -->
+<div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5 shrink-0 z-20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">history</span>
+<h2 class="text-white font-display font-bold text-lg tracking-wider">SYSTEM LOG</h2>
+</div>
+<!-- Filter Tabs -->
+<div class="flex bg-black/40 rounded-lg p-1 border border-white/5">
+<button class="px-3 py-1 text-xs font-display font-bold text-slate-900 bg-primary rounded shadow-sm">ALL</button>
+<button class="px-3 py-1 text-xs font-display font-bold text-slate-400 hover:text-white transition-colors">SECURITY</button>
+<button class="px-3 py-1 text-xs font-display font-bold text-slate-400 hover:text-white transition-colors">FEATURES</button>
+<button class="px-3 py-1 text-xs font-display font-bold text-slate-400 hover:text-white transition-colors">FIXES</button>
+</div>
+</div>
+<!-- Timeline Container -->
+<div class="flex-1 overflow-y-auto relative p-8 xl:p-12 custom-scrollbar">
+<!-- Vertical Line -->
+<div class="absolute left-12 xl:left-16 top-0 bottom-0 w-px bg-gradient-to-b from-primary/0 via-primary/50 to-primary/0 z-0"></div>
+<div class="space-y-12 relative z-10">
+<!-- Timeline Item 1 (Latest - Animated) -->
+<div class="relative pl-12 xl:pl-16 group">
+<!-- Node -->
+<div class="absolute left-[-5px] top-0 size-10 xl:left-[-1px] xl:top-0 bg-[#050A14] flex items-center justify-center z-10">
+<div class="hexagon size-6 bg-alert shadow-neon-red flex items-center justify-center animate-pulse">
+<div class="size-2 bg-white rounded-full"></div>
+</div>
+</div>
+<!-- Card -->
+<div class="ml-6 glass-panel rounded-lg border-l-4 border-l-alert p-5 hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
+<div class="flex items-center gap-3">
+<span class="text-alert font-mono font-bold text-lg">v2.4.1</span>
+<span class="bg-alert/10 text-alert border border-alert/20 text-[10px] font-display font-bold px-2 py-0.5 rounded uppercase tracking-wider">Security Patch</span>
+<span class="flex items-center gap-1 text-[10px] font-mono text-success">
+<span class="size-1.5 rounded-full bg-success animate-pulse"></span>
+                                            LIVE
+                                        </span>
+</div>
+<div class="flex items-center gap-2 text-slate-400">
+<span class="text-xs font-mono">Today, 09:42 AM</span>
+</div>
+</div>
+<h3 class="text-white font-display font-bold text-xl mb-2">AI Model adjustment for low-light detection</h3>
+<p class="text-slate-400 text-sm font-body leading-relaxed mb-4">
+                                    Critical update to the neural network weights to improve vehicle recognition in sub-optimal lighting conditions. Patched a potential overflow vulnerability in the video buffer stream.
+                                </p>
+<div class="flex items-center justify-between border-t border-white/5 pt-3 mt-2">
+<div class="flex items-center gap-2">
+<img class="size-6 rounded-full border border-slate-600" data-alt="Author Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQdhpX7KoA0UPpitj4ImkDFqHkwqub-4oAEzlOVljgfKxcPQjVnH3SFLKCLm1FZSvaKFhvUU5lp-7WN4WoCbMi_29uWB_x82BosPa8QNwfJKZ6ifRXshenKgW11_DMBjHmnXh4kVXcOak9mtc6tFV3s2o9zch5-uwH3g14BVNkb5k1uQ8gMsrgLJat17uobh11-UmV1LqcDzb1JTL3qjsHSc425PI0C6i91CU6xc-y00XI6A0XmXXzSy4xuOMl_ziJ14aIeNA3KOH_"/>
+<span class="text-xs text-slate-300 font-medium">Deployed by <span class="text-white">Cmdr. Alex Chen</span></span>
+</div>
+<button class="text-primary hover:text-white text-xs font-mono flex items-center gap-1 transition-colors">
+                                        VIEW DIFF <span class="material-symbols-outlined text-sm">code</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Timeline Item 2 -->
+<div class="relative pl-12 xl:pl-16 group opacity-80 hover:opacity-100 transition-opacity">
+<!-- Node -->
+<div class="absolute left-[-5px] top-0 size-10 xl:left-[-1px] xl:top-0 bg-[#050A14] flex items-center justify-center z-10">
+<div class="hexagon size-5 bg-primary/20 border border-primary text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]">star</span>
+</div>
+</div>
+<!-- Card -->
+<div class="ml-6 glass-panel rounded-lg border-l-4 border-l-primary p-5 hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
+<div class="flex items-center gap-3">
+<span class="text-primary font-mono font-bold text-lg">v2.4.0</span>
+<span class="bg-primary/10 text-primary border border-primary/20 text-[10px] font-display font-bold px-2 py-0.5 rounded uppercase tracking-wider">Feature Release</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500">
+<span class="text-xs font-mono">Yesterday, 14:20 PM</span>
+</div>
+</div>
+<h3 class="text-slate-200 font-display font-bold text-xl mb-2">Added multi-camera matrix support</h3>
+<p class="text-slate-400 text-sm font-body leading-relaxed mb-4">
+                                    Introduced the new "The Grid" layout allowing up to 9 simultaneous streams. Optimized WebGL rendering pipeline for 40% less GPU usage.
+                                </p>
+<div class="flex items-center justify-between border-t border-white/5 pt-3 mt-2">
+<div class="flex items-center gap-2">
+<img class="size-6 rounded-full border border-slate-600" data-alt="Author Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABMsTwdSf9u0X4vrBiDq0vEouidQGHIrqALGoHFTuGt6USDDUxeBYQ0j_mY_2j4BRdZtfEdHOxItoa5dALPbdaxr4elDCJL0bPsAkJbv_glDAXquU3cvTPWs5io2zox_IpVym-gCdztJXFehkot8_7j-4wFK5r28udLxPgDzhG5-TAZ-vMQYfKlJh01npeGwGPsqnmFIf8cfPTGk8IVbQES3kaMwXSnPMP5-6ur2p_yw5lcB3UarkilwSl7bWDDEC1xU57iUXj1KXh"/>
+<span class="text-xs text-slate-400 font-medium">Deployed by <span class="text-slate-300">Sarah J.</span></span>
+</div>
+<button class="text-slate-500 hover:text-white text-xs font-mono flex items-center gap-1 transition-colors">
+                                        VIEW DIFF <span class="material-symbols-outlined text-sm">code</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Timeline Item 3 -->
+<div class="relative pl-12 xl:pl-16 group opacity-60 hover:opacity-100 transition-opacity">
+<!-- Node -->
+<div class="absolute left-[-5px] top-0 size-10 xl:left-[-1px] xl:top-0 bg-[#050A14] flex items-center justify-center z-10">
+<div class="hexagon size-5 bg-warning/20 border border-warning text-warning flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]">build</span>
+</div>
+</div>
+<!-- Card -->
+<div class="ml-6 glass-panel rounded-lg border-l-4 border-l-warning p-5 hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
+<div class="flex items-center gap-3">
+<span class="text-warning font-mono font-bold text-lg">v2.3.9</span>
+<span class="bg-warning/10 text-warning border border-warning/20 text-[10px] font-display font-bold px-2 py-0.5 rounded uppercase tracking-wider">Bug Fix</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500">
+<span class="text-xs font-mono">Oct 24, 08:00 AM</span>
+</div>
+</div>
+<h3 class="text-slate-300 font-display font-bold text-xl mb-2">Resolved latency in data stream</h3>
+<p class="text-slate-500 text-sm font-body leading-relaxed">
+                                    Fixed a race condition in the websocket handler that caused packet loss during high traffic volume.
+                                </p>
+</div>
+</div>
+<!-- Timeline Item 4 (Oldest) -->
+<div class="relative pl-12 xl:pl-16 group opacity-40 hover:opacity-100 transition-opacity">
+<!-- Node -->
+<div class="absolute left-[-5px] top-0 size-10 xl:left-[-1px] xl:top-0 bg-[#050A14] flex items-center justify-center z-10">
+<div class="hexagon size-5 bg-slate-700 border border-slate-500 text-slate-400 flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</div>
+</div>
+<!-- Card -->
+<div class="ml-6 glass-panel rounded-lg border-l-4 border-l-slate-600 p-5 hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
+<div class="flex items-center gap-3">
+<span class="text-slate-400 font-mono font-bold text-lg">v2.3.8</span>
+<span class="bg-slate-800 text-slate-400 border border-slate-600 text-[10px] font-display font-bold px-2 py-0.5 rounded uppercase tracking-wider">Maintenance</span>
+</div>
+<div class="flex items-center gap-2 text-slate-600">
+<span class="text-xs font-mono">Oct 20, 11:30 PM</span>
+</div>
+</div>
+<h3 class="text-slate-400 font-display font-bold text-xl mb-2">Database Indexing</h3>
+<p class="text-slate-600 text-sm font-body leading-relaxed">
+                                    Routine database maintenance and index rebuilding for query performance optimization.
+                                </p>
+</div>
+</div>
+<!-- End of Line Decor -->
+<div class="relative pl-12 xl:pl-16 pb-12">
+<div class="absolute left-[-5px] top-0 size-10 xl:left-[-1px] xl:top-0 bg-[#050A14] flex items-center justify-center z-10">
+<div class="size-2 rounded-full bg-slate-800"></div>
+</div>
+<div class="ml-6 text-slate-700 text-xs font-mono uppercase tracking-widest">
+                                End of logs
+                            </div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

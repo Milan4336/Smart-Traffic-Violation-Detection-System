@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neon Guardian - Notification Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00f0ff", // Neon Cyan
+                        "primary-hover": "#00cceb",
+                        "secondary": "#2a85ff", // Electric Blue
+                        "background-light": "#f0f4f8",
+                        "background-dark": "#02040a", // Midnight black
+                        "surface-dark": "#050b14", // Deep blue-black
+                        "surface-lighter": "#0a1625", // Lighter blue-black
+                        "accent-blue": "#00f0ff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                    backgroundImage: {
+                        'shimmer': 'linear-gradient(to right, transparent 0%, rgba(0, 240, 255, 0.1) 50%, transparent 100%)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #02040a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0a1625; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff; 
+        }
+        .glass-blue {
+            background: rgba(10, 22, 37, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen overflow-hidden flex flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-[#0a1625] px-6 py-3 bg-white dark:bg-[#02040a] shrink-0 z-20">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900 dark:text-white">
+<div class="size-8 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[32px]">security</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight">Neon Guardian</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 h-10 w-64">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full bg-slate-100 dark:bg-[#050b14] border border-transparent focus-within:border-primary/50 transition-colors">
+<div class="text-slate-500 dark:text-[#475569] flex items-center justify-center pl-3">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 bg-transparent border-none text-sm text-slate-900 dark:text-white focus:ring-0 placeholder:text-slate-400 dark:placeholder:text-[#475569] px-3" placeholder="Search ID, Camera, Location..."/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary text-sm font-medium transition-colors" href="#">Live Feed</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary text-sm font-medium transition-colors" href="#">Violations</a>
+<a class="text-slate-500 dark:text-slate-500 cursor-not-allowed text-sm font-medium" href="#">Analytics</a>
+</nav>
+<div class="flex gap-3">
+<button class="relative flex items-center justify-center rounded-xl size-10 bg-slate-100 dark:bg-[#050b14] text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-[#0a1625] transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+<span class="absolute top-2 right-2 size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,240,255,0.8)] animate-pulse"></span>
+</button>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-primary/20" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC_N1aT6sM3moPFhuEnQ5a70DVgttDcmwwWijERPB3u1KWYwh1h1vA97sP2mXpByMtN5TghabsbUP3LCel9enHCAVVoNlLcwkHuxN_oz0caR7m4GAA2Q3IEaH3oG7PpkuvAUr5HNS3jl2PYRS8L6rr585VOdTrIH8UBcYnO4lMi86dVmeot6hjaiJ6u1ioXw24a6dHs8XcxM3fNKkiSzWDf0lPsZ4jH1-FMueBvmvpWzq4lYl0VPjNajLNUe0EDcfBoLAhT4VHUht4l");'></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<main aria-hidden="true" class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col gap-8 w-full transition-all duration-300 opacity-40 blur-sm select-none pointer-events-none">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">City Command Center</h1>
+<p class="text-slate-500 dark:text-slate-400">Real-time traffic monitoring and violation detection system.</p>
+</div>
+<div class="h-10 w-32 bg-slate-200 dark:bg-[#0a1625] rounded-lg animate-pulse"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-white dark:bg-[#050b14] p-5 rounded-xl border border-slate-200 dark:border-[#0a1625] relative overflow-hidden h-32 glass-blue">
+<div class="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent"></div>
+<div class="h-8 w-8 bg-slate-200 dark:bg-[#0a1625] rounded mb-4"></div>
+<div class="h-4 w-24 bg-slate-200 dark:bg-[#0a1625] rounded mb-2"></div>
+<div class="h-8 w-16 bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+</div>
+<div class="bg-white dark:bg-[#050b14] p-5 rounded-xl border border-slate-200 dark:border-[#0a1625] relative overflow-hidden h-32 glass-blue">
+<div class="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent"></div>
+<div class="h-8 w-8 bg-slate-200 dark:bg-[#0a1625] rounded mb-4"></div>
+<div class="h-4 w-24 bg-slate-200 dark:bg-[#0a1625] rounded mb-2"></div>
+<div class="h-8 w-16 bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+</div>
+<div class="bg-white dark:bg-[#050b14] p-5 rounded-xl border border-slate-200 dark:border-[#0a1625] relative overflow-hidden h-32 glass-blue">
+<div class="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent"></div>
+<div class="h-8 w-8 bg-slate-200 dark:bg-[#0a1625] rounded mb-4"></div>
+<div class="h-4 w-24 bg-slate-200 dark:bg-[#0a1625] rounded mb-2"></div>
+<div class="h-8 w-16 bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+</div>
+<div class="bg-white dark:bg-[#050b14] p-5 rounded-xl border border-slate-200 dark:border-[#0a1625] relative overflow-hidden h-32 glass-blue">
+<div class="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent"></div>
+<div class="h-8 w-8 bg-slate-200 dark:bg-[#0a1625] rounded mb-4"></div>
+<div class="h-4 w-24 bg-slate-200 dark:bg-[#0a1625] rounded mb-2"></div>
+<div class="h-8 w-16 bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+<div class="lg:col-span-2 bg-white dark:bg-[#050b14] rounded-xl border border-slate-200 dark:border-[#0a1625] p-6 relative overflow-hidden min-h-[400px] glass-blue">
+<div class="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent"></div>
+<div class="flex justify-between items-center mb-6">
+<div class="h-6 w-40 bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+<div class="h-8 w-24 bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+</div>
+<div class="space-y-4">
+<div class="h-12 w-full bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+<div class="h-12 w-full bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+<div class="h-12 w-full bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+<div class="h-12 w-full bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+<div class="h-12 w-full bg-slate-200 dark:bg-[#0a1625] rounded"></div>
+</div>
+</div>
+<div class="bg-white dark:bg-[#050b14] rounded-xl border border-slate-200 dark:border-[#0a1625] p-6 flex flex-col items-center justify-center text-center relative overflow-hidden glass-blue">
+<div class="p-4 rounded-full bg-slate-100 dark:bg-[#0a1625] mb-4 relative group">
+<div class="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+<span class="material-symbols-outlined text-4xl text-slate-400 dark:text-primary relative z-10">bar_chart_off</span>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">No Analytics Data</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 max-w-[200px]">Data aggregation is currently paused while system updates are applied.</p>
+</div>
+</div>
+</main>
+<aside class="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-white dark:bg-[#02040a] border-l border-slate-200 dark:border-[#0a1625] shadow-2xl z-30 flex flex-col transform transition-transform duration-300 ease-in-out">
+<div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-[#0a1625] bg-white dark:bg-[#02040a]">
+<div class="flex items-center gap-3">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Notifications</h2>
+<span class="flex items-center justify-center h-5 px-2 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20 shadow-[0_0_10px_rgba(0,240,255,0.2)]">3 New</span>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-3">
+<div class="px-2 pt-2 pb-1">
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Today</span>
+</div>
+<div class="group relative p-4 rounded-xl bg-blue-50 dark:bg-[#0a1625]/40 border border-blue-100 dark:border-primary/20 hover:border-primary/50 hover:dark:bg-[#0a1625]/60 transition-all cursor-pointer">
+<div class="absolute top-4 right-4 size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,240,255,0.6)]"></div>
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-blue-100 dark:bg-primary/10 text-blue-600 dark:text-primary flex items-center justify-center border border-blue-200 dark:border-primary/20">
+<span class="material-symbols-outlined">gpp_maybe</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Critical Violation Detected</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">High-speed collision risk detected at Intersection 4A. Emergency protocols initiated.</p>
+<span class="text-[10px] font-medium text-slate-400 mt-1">12:45 PM</span>
+</div>
+</div>
+</div>
+<div class="group relative p-4 rounded-xl bg-slate-50 dark:bg-[#0a1625]/40 border border-slate-100 dark:border-secondary/20 hover:border-secondary/40 hover:dark:bg-[#0a1625]/60 transition-all cursor-pointer">
+<div class="absolute top-4 right-4 size-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(42,133,255,0.6)]"></div>
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-slate-100 dark:bg-secondary/10 text-slate-600 dark:text-secondary flex items-center justify-center border border-slate-200 dark:border-secondary/20">
+<span class="material-symbols-outlined">videocam_off</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-secondary transition-colors">Camera Offline</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400">Signal lost for North Sector Cam 02. Attempting auto-reconnect...</p>
+<span class="text-[10px] font-medium text-slate-400 mt-1">12:30 PM</span>
+</div>
+</div>
+</div>
+<div class="group relative p-4 rounded-xl bg-cyan-50 dark:bg-[#0a1625]/40 border border-cyan-100 dark:border-primary/20 hover:border-primary/40 hover:dark:bg-[#0a1625]/60 transition-all cursor-pointer">
+<div class="absolute top-4 right-4 size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,240,255,0.4)]"></div>
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-cyan-100 dark:bg-primary/10 text-cyan-600 dark:text-primary flex items-center justify-center border border-cyan-200 dark:border-primary/20">
+<span class="material-symbols-outlined">system_update</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">System Update Available</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400">Patch v2.4.1 is ready to install. Includes AI model improvements.</p>
+<span class="text-[10px] font-medium text-slate-400 mt-1">10:00 AM</span>
+</div>
+</div>
+</div>
+<div class="px-2 pt-4 pb-1">
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Yesterday</span>
+</div>
+<div class="group relative p-4 rounded-xl bg-transparent border border-transparent hover:bg-slate-50 dark:hover:bg-[#050b14] transition-all cursor-pointer opacity-60 hover:opacity-100">
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-slate-100 dark:bg-[#0a1625] text-slate-500 dark:text-slate-400 flex items-center justify-center border border-slate-200 dark:border-[#1e293b]">
+<span class="material-symbols-outlined">cloud_upload</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white">Data Sync Completed</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400">Daily violation logs successfully uploaded to central server.</p>
+<span class="text-[10px] font-medium text-slate-400 mt-1">11:50 PM</span>
+</div>
+</div>
+</div>
+<div class="group relative p-4 rounded-xl bg-transparent border border-transparent hover:bg-slate-50 dark:hover:bg-[#050b14] transition-all cursor-pointer opacity-60 hover:opacity-100">
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-slate-100 dark:bg-[#0a1625] text-slate-500 dark:text-slate-400 flex items-center justify-center border border-slate-200 dark:border-[#1e293b]">
+<span class="material-symbols-outlined">shield</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white">Security Scan</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400">Routine integrity check passed. No vulnerabilities found.</p>
+<span class="text-[10px] font-medium text-slate-400 mt-1">09:15 AM</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-slate-200 dark:border-[#0a1625] bg-slate-50 dark:bg-[#02040a]">
+<button class="w-full h-10 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+                    Mark all as read
+                </button>
+</div>
+</aside>
+</div>
+</body></html>

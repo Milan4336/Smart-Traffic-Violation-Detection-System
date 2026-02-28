@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Midnight Grid Live Monitoring - Neon Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06e8f9",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0b1215", // Deep midnight blue/black
+                        "surface-dark": "#121e21", // Slightly lighter midnight
+                        "surface-highlight": "#1a2c30",
+                        "text-main": "#e2e8f0",
+                        "text-muted": "#94a3b8",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1215; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a2c30; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06e8f9; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main overflow-hidden h-screen flex">
+<!-- Sidebar -->
+<aside class="w-64 h-full bg-surface-dark border-r border-surface-highlight flex flex-col justify-between shrink-0 transition-all duration-300">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-10">
+<div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(6,232,249,0.3)]">
+<span class="material-symbols-outlined text-black font-bold text-xl">security</span>
+</div>
+<div>
+<h1 class="text-white text-base font-bold tracking-wide">Neon Guardian</h1>
+<p class="text-primary text-xs font-medium tracking-wider">v2.4.0 ONLINE</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-highlight hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-highlight text-white shadow-[0_0_10px_rgba(0,0,0,0.2)] border border-surface-highlight/50" href="#">
+<span class="material-symbols-outlined text-2xl text-primary">grid_view</span>
+<span class="text-sm font-medium">Live Grid</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-highlight hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:text-red-400 transition-colors">warning</span>
+<div class="flex justify-between w-full items-center">
+<span class="text-sm font-medium">Incidents</span>
+<span class="bg-red-500/20 text-red-400 text-[10px] font-bold px-1.5 py-0.5 rounded">3</span>
+</div>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-highlight hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">analytics</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-highlight hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">map</span>
+<span class="text-sm font-medium">Map View</span>
+</a>
+</nav>
+</div>
+<div class="p-6 border-t border-surface-highlight">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-muted hover:bg-surface-highlight hover:text-white transition-colors group mb-2" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">System Settings</span>
+</a>
+<div class="flex items-center gap-3 mt-4 px-2">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-10 w-10 border-2 border-surface-highlight" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAqkct6xTUYzmfmofQ8xxzcvvXDj1GIXJ2nUuGhs7imIR7i493bNsf-n6Ecu_LKb2IOk_TxHszD9mP7Hay_dKGDg7NE8AJBmw8fnCxxjfFU9Iqg3o9CTni3Zx4SEiTTg92Ls9tqyiri8pY7NKNt6My7PPM4vcDRqozctau_AQ-g2DveDuQ43lW9rdb4-_jzuTonabvxdgu82seLTHYl9aaEj44xAErAkTONLcdWSyTjKK78reEG67fGXxqWyb8AwYpGBO1hux7GAut_");'></div>
+<div class="flex flex-col overflow-hidden">
+<p class="text-white text-sm font-medium truncate">Officer K. Deckard</p>
+<p class="text-text-muted text-xs truncate">Zone A Supervisor</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- Header -->
+<header class="flex items-center justify-between px-8 py-4 border-b border-surface-highlight bg-background-dark/95 backdrop-blur z-10">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary animate-pulse">videocam</span>
+<h2 class="text-white text-xl font-bold tracking-tight">Live Monitoring - Midnight Sector</h2>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted text-lg group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="block w-64 bg-surface-dark border border-surface-highlight text-white text-sm rounded-lg pl-10 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-text-muted transition-all" placeholder="Search camera feed..." type="text"/>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-3">
+<button class="relative p-2.5 bg-surface-dark hover:bg-surface-highlight rounded-lg text-white transition-colors border border-surface-highlight">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border border-surface-dark"></span>
+</button>
+<button class="p-2.5 bg-surface-dark hover:bg-surface-highlight rounded-lg text-white transition-colors border border-surface-highlight">
+<span class="material-symbols-outlined text-xl">forum</span>
+</button>
+<button class="p-2.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-lg transition-colors flex items-center gap-2 px-4">
+<span class="material-symbols-outlined text-xl">add_a_photo</span>
+<span class="text-sm font-bold">Snapshot</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Filters & Status Bar -->
+<div class="px-8 py-4 flex items-center justify-between bg-surface-dark/50 border-b border-surface-highlight">
+<div class="flex gap-2">
+<button class="px-4 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-xs font-semibold uppercase tracking-wider hover:bg-primary/30 transition-colors">
+                    All Feeds
+                </button>
+<button class="px-4 py-1.5 rounded-full bg-surface-highlight text-text-muted border border-transparent text-xs font-semibold uppercase tracking-wider hover:text-white transition-colors">
+                    Alerts Only
+                </button>
+<button class="px-4 py-1.5 rounded-full bg-surface-highlight text-text-muted border border-transparent text-xs font-semibold uppercase tracking-wider hover:text-white transition-colors">
+                    Favorites
+                </button>
+</div>
+<div class="flex items-center gap-4 text-xs text-text-muted font-mono">
+<span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> System Normal</span>
+<span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div> AI Active</span>
+<span>CPU: 34%</span>
+<span>MEM: 62%</span>
+</div>
+</div>
+<!-- Camera Grid -->
+<div class="flex-1 overflow-y-auto p-6 bg-[#080c0e]">
+<div class="grid grid-cols-4 gap-4 h-full grid-rows-3">
+<!-- Main Featured Feed (Spans 2x2) -->
+<div class="col-span-2 row-span-2 relative group rounded-xl overflow-hidden border-2 border-primary shadow-[0_0_20px_rgba(6,232,249,0.15)] bg-surface-dark">
+<div class="absolute top-4 left-4 z-10 flex gap-2">
+<span class="bg-red-600/90 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm animate-pulse">LIVE FEED</span>
+<span class="bg-black/60 text-primary text-[10px] font-mono px-2 py-1 rounded backdrop-blur-sm border border-primary/30">CAM-01: Main Intersection</span>
+</div>
+<!-- AI Overlay SVG -->
+<div class="absolute inset-0 z-10 pointer-events-none">
+<svg class="absolute inset-0" height="100%" width="100%">
+<!-- Bounding Box -->
+<rect fill="rgba(6,232,249,0.1)" height="25%" stroke="#06e8f9" stroke-dasharray="10,5" stroke-width="2" width="20%" x="35%" y="40%"></rect>
+<!-- Label -->
+<rect fill="#06e8f9" height="24" width="120" x="35%" y="35%"></rect>
+<text fill="black" font-family="monospace" font-size="12" font-weight="bold" x="36%" y="38.5%">SPEEDING: 85km/h</text>
+<!-- Tracking Lines -->
+<line stroke="#06e8f9" stroke-width="1" x1="45%" x2="55%" y1="52.5%" y2="52.5%"></line>
+<circle cx="45%" cy="52.5%" fill="#06e8f9" r="2"></circle>
+</svg>
+</div>
+<img alt="Busy night intersection traffic" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBe6flD8XmEdPe9nQzZdxT_vHukDu46iEADt558MKdxFv6qsz7HrjYvZP4Uo95nHUrvXn1raJ--V0TcNJmHvRntx-174JF6LiI2NcLkZilNKahb8lnSlaSDFqHejwH56UnpbYWCAEAEhfwIOrhF2yD0wlA2nj80jaYgg-3_72IxBZuWRLPujnOcLYig6jqhCwCnpnHHTo9UMyym5g_E7Nr0YkFyNBigtISAhUOsfDiwS1JfSAeZej-iv_LJj-s0ReRATGdtI1Pahw6d"/>
+<!-- Bottom Controls -->
+<div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+<div class="flex justify-between items-center">
+<div class="flex gap-2">
+<button class="p-1.5 rounded bg-surface-highlight hover:bg-primary hover:text-black text-white transition-colors">
+<span class="material-symbols-outlined text-lg">zoom_in</span>
+</button>
+<button class="p-1.5 rounded bg-surface-highlight hover:bg-primary hover:text-black text-white transition-colors">
+<span class="material-symbols-outlined text-lg">history</span>
+</button>
+</div>
+<span class="text-primary text-xs font-mono">AI CONFIDENCE: 98.4%</span>
+</div>
+</div>
+</div>
+<!-- Standard Feed 2 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-02</span>
+<div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+</div>
+<img alt="Highway overpass at night" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACrRfgwHUBOCe3i9wwJITjrbLIBMpB1FnH73iJ4NTl8Z4FcDyZNbfxvC6yu5d1lKrPHqB14AUANP3qsk5mEkWWUEgtcZ3Vaa7Y8BPhb-balHTWPfSG2C2DD7IjyfLf8ZfPXpmZb-XA0x6Op2Clgk4chozT7erQoR0ML2frrrlzMYjaxGbf73EHKMz3Blo9jh9UkxnVHrGPUeYBCqOJAiH9F3S2z42Sf7P97eQVJfMtUoyTI1Ewvh-hIZob0YFa1BcvKZoVLoyABCVC"/>
+</div>
+<!-- Standard Feed 3 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-03</span>
+<div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+</div>
+<img alt="City street with neon signs" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDi8ZBirUX3X1CKl_EURWeWn5djPD7ep7kcg9C0H3bvhGa0jRV2sP4G1AcUu9IuAHq-_tpJYCehm3ebTY3aFsMHyQzlkvWhf17eELrQoDof6v5WAt2JzyZt4mPpypwKGwvly441pShzeLkYDBL51pcKbRUHfxSEGJqHl0YRyw0ESQYiKEIST9vzbppKHpXceqGUr-y-WgFnmnxjicP-fDPC4o3rLyFgEnI7BGmz2-MKXhvRmkzhUy6hSiUbSYpiVRHGUlZwMD675sAX"/>
+</div>
+<!-- Standard Feed 4 -->
+<div class="relative rounded-lg overflow-hidden border border-red-500/50 bg-surface-dark group hover:border-red-500 transition-colors shadow-[0_0_10px_rgba(239,68,68,0.1)]">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-red-600 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm animate-pulse">ALERT</span>
+<div class="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]"></div>
+</div>
+<!-- Red Overlay for alert -->
+<div class="absolute inset-0 bg-red-500/10 pointer-events-none z-0"></div>
+<img alt="Dark alleyway surveillance" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4DHmFY2aVKSRX1_ny1_7x5UT3tDxHaesjzdSm1DdveCrTNAQgFdNADKP7MkUrUEHa-v0Mzrubf9Rn2EYOcyCIGjk5FIs5bnSpetXcOaLK0T7FrOo1MU3GB9L076p8okhJK-CtYUzBeZuw4uE_jrP7BeMN6WYmCnWEpQ8DMEFjT3PVKbfR4QvULai2YR1MeOXbzLIBgOjerc6Uecnbst3BzIqT8yKBH5IUREZHq5jwId8MoRDebbD8M4CmTQz0dIbLIlnUuA25F_E1"/>
+</div>
+<!-- Standard Feed 5 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-05</span>
+<div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+</div>
+<img alt="Blurry car lights on highway" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfpbXHeCMtil7bYhaOiRA1l9nR7oMNNpRw6XhEQF3gHMwBIdf9UulC3qx37ItycWMSK05Zub4e49bQCJJI1Sv9f2Cl-GfiKeXvocUAt1ITVeS5tUZBkUbEqYELA6FmCniFnX_VsoFtdCSOypSBCFAepe6afWFbxCWLQTzDRDjo5K3HVtn4cf-8haCkjbE1mJTBKv_h0f-ZEIziRNp4vodL3dsqQUXPaYHbElte-gaXBpyha8iNBCCepiFB8N-jqViLbKFcFxO2Nl5A"/>
+</div>
+<!-- Standard Feed 6 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-06</span>
+<div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+</div>
+<img alt="Subway station platform empty" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuLHyaLdGE-7v4DLKpzGHRIi275SYDuUbrTdQNAsT3hJ6a0hDTsEtuu4TEI9-kO7Wh8FxyO5z767DtHNBBos8NhyhLt6pstLklGcU0mGawkfyGBbcqw7tsqri-46vlZ1fwkUMUdI6W1Hw9Xc2YmpBrlPWvyOAHs5TB98CCX3xfbPa3U4XoXRaHT6-KywSWmt3bwqeJDjJwZcBEYcrv6j1nKRS-hl1uleq9JqMsK63p60WuIFr0WOh_RFgjYG5OHifvX47967WlR5nU"/>
+</div>
+<!-- Standard Feed 7 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-07</span>
+<div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+</div>
+<img alt="Parking lot surveillance" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVYgSX_Y_R2sfEAhpx4CPOQrC6LQcUAmegWGMMGqy5cT1LjcwNJLpEOHjVBrz0Tuavh2YcPkQnBKs9ux9HIhPfw9Dm2vb2kTSzu_9fbsk330neZ12KW8H79AUy5oUtoAGo4xXATCbdj0cPkUoPKebSWbuZC1QOif6isf4Q_CVL1j3z9xP1Y_1iHRI16bzeD_V5YaBMHPZxncmoIor2aM6NsLnrO2SMbnvAyFbe69BIdiDK6RHoygRssv1KTHA8b58bT2U8u5camS8T"/>
+</div>
+<!-- Standard Feed 8 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-08</span>
+<div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+</div>
+<img alt="Industrial zone night view" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCt2A7e5mWzd8d3NH5jEFsT6CimqV7XnMaijhIhBchh002oRkMEjCK7aiJFyywT0fbcYvpHGYDb6lEmMVq6FtZVHHkJdG0gu7sni-fyRp211zef829cXBWVvbjulFq4STkDwz_lSOywZ2D4b1xcPL2YKK18HoAMMlXabEa_sS8iDa4D6bggg55yf1T6E_rLH_hI5pn_pQ4M-skFBILKODhkjrLWNkpz6hJCG-061373xbMr17t8VBM8NMz4DR9HMOVS8E-DWnvRYL6W"/>
+</div>
+<!-- Standard Feed 9 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-09</span>
+<div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></div>
+</div>
+<img alt="New York city street night" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsVHh0Glc8OMFULMejCjuBn0OdNbaCWMk8kKWJiP4e82JzRY3DnqQGMJZuwB6FhyrBeeGY0TcgEUxpSoIx_I82ik7JXNPwIjzFXpjAH2PBLiHyjFq0ahWhwllsdtNtBB_OboAg1afrIQAaT-hoFNeo6w2BbtjGBi47itRrx2wO9iAiFumLXVybMyAMpxmwU4cBT48Hc63eDaPrghRDaU7wUnJOR0MtxJS3Gr4_cmThU5U2G4QT-EOMfur_WjQhuNmoUDuhdVxlpxDq"/>
+</div>
+<!-- Standard Feed 10 -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group hover:border-primary/50 transition-colors">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-white text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-10</span>
+<div class="h-2 w-2 rounded-full bg-orange-500 shadow-[0_0_5px_#f97316]"></div>
+</div>
+<img alt="Bridge suspension cables night" class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYDrYqXOCmJZHdwxKjqoAoYlXUnMSnNy5GRe5MlHlWZ9kyEur-9frHUTPxYUgoMMZGQ1Xw58mgW1QYoZQa1pFQVGTAYYbnW77cJXQKqthZtduoH5YBg7mgNaKXmCvFi3YirKOCqrhHQVPH0U_tCMJUciqVlCFRZ718F-2HJ1egC9-qt6r11Gula0k91bOgmDZnW1QpksYBmWtsqIfJgJZrPYUoELKSitRMMxHGioltq_n43wTLY_z_S-NV1HZAxH6atiRyptNwOVBW"/>
+</div>
+<!-- Standard Feed 11 (Offline) -->
+<div class="relative rounded-lg overflow-hidden border border-surface-highlight bg-surface-dark group flex flex-col items-center justify-center">
+<div class="absolute top-2 left-2 z-10 flex justify-between w-[calc(100%-16px)]">
+<span class="bg-black/60 text-text-muted text-[10px] font-mono px-1.5 py-0.5 rounded backdrop-blur-sm">CAM-11</span>
+<div class="h-2 w-2 rounded-full bg-gray-600"></div>
+</div>
+<span class="material-symbols-outlined text-4xl text-surface-highlight mb-2">videocam_off</span>
+<p class="text-xs text-text-muted font-mono">SIGNAL LOST</p>
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0xIDNoMXYxSDFWM3ptMiAxaDF2MUgzVjR6IiBmaWxsPSIjMjIyIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')] opacity-20"></div>
+</div>
+</div>
+</div>
+<!-- Footer / Timeline Scrubber -->
+<div class="h-16 bg-surface-dark border-t border-surface-highlight flex items-center px-6 shrink-0 z-20">
+<button class="mr-4 p-2 rounded-full bg-primary text-black hover:bg-white transition-colors shadow-[0_0_10px_rgba(6,232,249,0.4)]">
+<span class="material-symbols-outlined text-xl">pause</span>
+</button>
+<div class="flex-1 relative h-8 flex items-center group cursor-pointer">
+<!-- Timeline Track -->
+<div class="absolute inset-x-0 h-1 bg-surface-highlight rounded-full overflow-hidden">
+<!-- Progress -->
+<div class="h-full bg-primary w-[85%] relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+</div>
+</div>
+<!-- Time Markers -->
+<div class="absolute inset-x-0 top-6 flex justify-between text-[10px] text-text-muted font-mono select-none pointer-events-none">
+<span>23:00</span>
+<span>23:15</span>
+<span>23:30</span>
+<span>23:45</span>
+<span class="text-primary">00:00 (LIVE)</span>
+</div>
+<!-- Hover Effect for timeline -->
+<div class="absolute inset-y-0 w-0.5 bg-white/30 hidden group-hover:block pointer-events-none left-1/2"></div>
+</div>
+<div class="ml-6 flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="text-lg font-bold font-mono text-white leading-none">00:04:32</span>
+<span class="text-[10px] text-text-muted">Tuesday, Oct 24</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

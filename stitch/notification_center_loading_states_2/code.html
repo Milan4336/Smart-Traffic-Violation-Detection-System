@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neon Guardian - Notification Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00f0ff", // Neon Cyan
+                        "primary-hover": "#00cceb",
+                        "secondary": "#2a85ff", // Electric Blue
+                        "background-light": "#f0f4f8",
+                        "background-dark": "#02040a", // Midnight black
+                        "surface-dark": "#050b14", // Deep blue-black
+                        "surface-lighter": "#0a1625", // Lighter blue-black
+                        "skeleton-base": "rgba(10, 22, 37, 0.6)",
+                        "skeleton-highlight": "rgba(0, 240, 255, 0.05)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    animation: {
+                        'energy-pulse': 'energy-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        'energy-pulse': {
+                            '0%, 100%': { opacity: '0.4' },
+                            '50%': { opacity: '0.8', boxShadow: '0 0 15px rgba(0, 240, 255, 0.1)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #02040a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0a1625; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff; 
+        }
+        .glass-blue {
+            background: rgba(5, 11, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        .glass-panel {
+            background: linear-gradient(180deg, rgba(10, 22, 37, 0.6) 0%, rgba(2, 4, 10, 0.8) 100%);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .skeleton-shimmer {
+            position: relative;
+            overflow: hidden;
+            background: rgba(10, 22, 37, 0.8);
+        }
+        .skeleton-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(0, 240, 255, 0.05) 20%,
+                rgba(0, 240, 255, 0.1) 60%,
+                rgba(255, 255, 255, 0)
+            );
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen overflow-hidden flex flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-[#0a1625] px-6 py-3 bg-white dark:bg-[#02040a] shrink-0 z-40 relative">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900 dark:text-white">
+<div class="size-8 text-primary flex items-center justify-center drop-shadow-[0_0_8px_rgba(0,240,255,0.5)]">
+<span class="material-symbols-outlined text-[32px]">security</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight">Neon Guardian</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 h-10 w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-slate-100 dark:bg-[#050b14] border border-transparent focus-within:border-primary/50 transition-colors">
+<div class="text-slate-500 dark:text-[#475569] flex items-center justify-center pl-3">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 bg-transparent border-none text-sm text-slate-900 dark:text-white focus:ring-0 placeholder:text-slate-400 dark:placeholder:text-[#475569] px-3" placeholder="Search ID, Camera, Location..."/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary text-sm font-medium transition-colors" href="#">Live Feed</a>
+<a class="text-slate-600 dark:text-slate-300 hover:text-primary text-sm font-medium transition-colors" href="#">Violations</a>
+<a class="text-slate-500 dark:text-slate-500 cursor-not-allowed text-sm font-medium" href="#">Analytics</a>
+</nav>
+<div class="flex gap-3">
+<button class="relative flex items-center justify-center rounded-lg size-10 bg-slate-100 dark:bg-[#050b14] text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-[#0a1625] transition-colors border border-transparent dark:border-white/5">
+<span class="material-symbols-outlined text-primary">notifications</span>
+<span class="absolute top-2 right-2 size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,240,255,0.8)] animate-pulse"></span>
+</button>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-primary/20 shadow-[0_0_10px_rgba(0,240,255,0.2)]" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC_N1aT6sM3moPFhuEnQ5a70DVgttDcmwwWijERPB3u1KWYwh1h1vA97sP2mXpByMtN5TghabsbUP3LCel9enHCAVVoNlLcwkHuxN_oz0caR7m4GAA2Q3IEaH3oG7PpkuvAUr5HNS3jl2PYRS8L6rr585VOdTrIH8UBcYnO4lMi86dVmeot6hjaiJ6u1ioXw24a6dHs8XcxM3fNKkiSzWDf0lPsZ4jH1-FMueBvmvpWzq4lYl0VPjNajLNUe0EDcfBoLAhT4VHUht4l");'></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<main aria-hidden="true" class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col gap-8 w-full transition-all duration-300 bg-[#02040a]">
+<div class="flex justify-between items-end">
+<div class="space-y-3">
+<div class="h-8 w-64 skeleton-shimmer rounded-lg border border-white/5"></div>
+<div class="h-4 w-96 skeleton-shimmer rounded-lg border border-white/5 opacity-60"></div>
+</div>
+<div class="h-10 w-32 skeleton-shimmer rounded-lg border border-primary/20 shadow-[0_0_10px_rgba(0,240,255,0.05)]"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="glass-blue p-5 rounded-xl h-36 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="h-10 w-10 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-4 w-16 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+<div class="space-y-2">
+<div class="h-8 w-24 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-3 w-32 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+</div>
+<div class="glass-blue p-5 rounded-xl h-36 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="h-10 w-10 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-4 w-16 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+<div class="space-y-2">
+<div class="h-8 w-24 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-3 w-32 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+</div>
+<div class="glass-blue p-5 rounded-xl h-36 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="h-10 w-10 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-4 w-16 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+<div class="space-y-2">
+<div class="h-8 w-24 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-3 w-32 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+</div>
+<div class="glass-blue p-5 rounded-xl h-36 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="h-10 w-10 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-4 w-16 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+<div class="space-y-2">
+<div class="h-8 w-24 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="h-3 w-32 skeleton-shimmer rounded-md border border-white/5 opacity-50"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[500px]">
+<div class="lg:col-span-2 glass-blue rounded-xl p-6 flex flex-col gap-6">
+<div class="flex justify-between items-center mb-2">
+<div class="h-6 w-48 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="flex gap-2">
+<div class="h-8 w-20 skeleton-shimmer rounded-lg border border-white/5"></div>
+<div class="h-8 w-8 skeleton-shimmer rounded-lg border border-white/5"></div>
+</div>
+</div>
+<div class="flex items-end justify-between h-64 gap-2 px-2 pb-4 border-b border-white/5">
+<div class="w-full h-[40%] skeleton-shimmer rounded-t-lg opacity-30"></div>
+<div class="w-full h-[70%] skeleton-shimmer rounded-t-lg opacity-50"></div>
+<div class="w-full h-[50%] skeleton-shimmer rounded-t-lg opacity-40"></div>
+<div class="w-full h-[85%] skeleton-shimmer rounded-t-lg opacity-70"></div>
+<div class="w-full h-[60%] skeleton-shimmer rounded-t-lg opacity-50"></div>
+<div class="w-full h-[90%] skeleton-shimmer rounded-t-lg opacity-80"></div>
+<div class="w-full h-[45%] skeleton-shimmer rounded-t-lg opacity-40"></div>
+<div class="w-full h-[75%] skeleton-shimmer rounded-t-lg opacity-60"></div>
+</div>
+<div class="space-y-3">
+<div class="h-10 w-full skeleton-shimmer rounded-lg border border-white/5 opacity-60"></div>
+<div class="h-10 w-full skeleton-shimmer rounded-lg border border-white/5 opacity-50"></div>
+<div class="h-10 w-full skeleton-shimmer rounded-lg border border-white/5 opacity-40"></div>
+</div>
+</div>
+<div class="glass-blue rounded-xl p-6 flex flex-col gap-6">
+<div class="h-6 w-32 skeleton-shimmer rounded-lg border border-white/10"></div>
+<div class="flex-1 flex items-center justify-center py-4">
+<div class="relative size-48 rounded-full border-[12px] border-[#0a1625] skeleton-shimmer flex items-center justify-center shadow-[0_0_20px_rgba(0,240,255,0.05)]">
+<div class="absolute inset-0 rounded-full border-[12px] border-primary/20 border-t-transparent border-r-transparent animate-spin duration-[3s]"></div>
+<div class="size-24 rounded-full bg-[#02040a]"></div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="size-3 rounded-full bg-primary/20 skeleton-shimmer"></div>
+<div class="h-4 flex-1 skeleton-shimmer rounded-md opacity-60"></div>
+<div class="h-4 w-12 skeleton-shimmer rounded-md opacity-60"></div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-3 rounded-full bg-secondary/20 skeleton-shimmer"></div>
+<div class="h-4 flex-1 skeleton-shimmer rounded-md opacity-50"></div>
+<div class="h-4 w-12 skeleton-shimmer rounded-md opacity-50"></div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-3 rounded-full bg-white/10 skeleton-shimmer"></div>
+<div class="h-4 flex-1 skeleton-shimmer rounded-md opacity-40"></div>
+<div class="h-4 w-12 skeleton-shimmer rounded-md opacity-40"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<aside class="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-white dark:bg-[#02040a] border-l border-slate-200 dark:border-[#0a1625] shadow-[0_0_50px_rgba(0,0,0,0.5)] z-30 flex flex-col transform transition-transform duration-300 ease-in-out">
+<div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-[#0a1625] bg-white dark:bg-[#02040a]">
+<div class="flex items-center gap-3">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Notifications</h2>
+<span class="flex items-center justify-center h-5 px-2 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20 shadow-[0_0_10px_rgba(0,240,255,0.2)] animate-pulse">3 New</span>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#02040a]">
+<div class="px-2 pt-2 pb-1">
+<span class="text-xs font-semibold text-primary/60 uppercase tracking-widest">Live Stream</span>
+</div>
+<div class="group relative p-4 rounded-xl bg-blue-50 dark:bg-[#050b14] border border-blue-100 dark:border-primary/30 hover:border-primary/60 hover:dark:bg-[#0a1625] transition-all cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.2)]">
+<div class="absolute top-4 right-4 size-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,240,255,0.8)] animate-pulse"></div>
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-blue-100 dark:bg-primary/10 text-blue-600 dark:text-primary flex items-center justify-center border border-blue-200 dark:border-primary/20 shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+<span class="material-symbols-outlined">gpp_maybe</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Critical Violation</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">High-speed collision risk detected at Intersection 4A.</p>
+<span class="text-[10px] font-medium text-primary/60 mt-1 font-mono">12:45:22 PM</span>
+</div>
+</div>
+</div>
+<div class="group relative p-4 rounded-xl bg-slate-50 dark:bg-[#050b14] border border-slate-100 dark:border-secondary/30 hover:border-secondary/60 hover:dark:bg-[#0a1625] transition-all cursor-pointer">
+<div class="absolute top-4 right-4 size-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(42,133,255,0.8)]"></div>
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-slate-100 dark:bg-secondary/10 text-slate-600 dark:text-secondary flex items-center justify-center border border-slate-200 dark:border-secondary/20 shadow-[0_0_10px_rgba(42,133,255,0.1)]">
+<span class="material-symbols-outlined">videocam_off</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-secondary transition-colors">Camera Offline</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400">Signal lost for North Sector Cam 02. Reconnecting...</p>
+<span class="text-[10px] font-medium text-slate-500 mt-1 font-mono">12:30:05 PM</span>
+</div>
+</div>
+</div>
+<div class="group relative p-4 rounded-xl bg-cyan-50 dark:bg-[#050b14] border border-cyan-100 dark:border-white/10 hover:border-primary/40 hover:dark:bg-[#0a1625] transition-all cursor-pointer">
+<div class="absolute top-4 right-4 size-2 rounded-full bg-primary/50 shadow-[0_0_8px_rgba(0,240,255,0.4)]"></div>
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-cyan-100 dark:bg-white/5 text-cyan-600 dark:text-slate-300 flex items-center justify-center border border-cyan-200 dark:border-white/10">
+<span class="material-symbols-outlined">system_update</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">System Update</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400">Patch v2.4.1 installed. AI models updated.</p>
+<span class="text-[10px] font-medium text-slate-500 mt-1 font-mono">10:00:00 AM</span>
+</div>
+</div>
+</div>
+<div class="px-2 pt-4 pb-1">
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-widest">History</span>
+</div>
+<div class="group relative p-4 rounded-xl bg-transparent border border-transparent hover:bg-slate-50 dark:hover:bg-[#050b14] transition-all cursor-pointer opacity-50 hover:opacity-100">
+<div class="flex gap-4">
+<div class="shrink-0">
+<div class="size-10 rounded-lg bg-slate-100 dark:bg-[#0a1625] text-slate-500 dark:text-slate-400 flex items-center justify-center border border-slate-200 dark:border-[#1e293b]">
+<span class="material-symbols-outlined">cloud_upload</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white">Data Sync Completed</h4>
+<p class="text-xs text-slate-600 dark:text-slate-400">Daily violation logs uploaded.</p>
+<span class="text-[10px] font-medium text-slate-500 mt-1 font-mono">11:50 PM</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-slate-200 dark:border-[#0a1625] bg-slate-50 dark:bg-[#02040a]">
+<button class="w-full h-10 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,240,255,0.15)] hover:shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+                Mark all as read
+            </button>
+</div>
+</aside>
+</div>
+
+</body></html>

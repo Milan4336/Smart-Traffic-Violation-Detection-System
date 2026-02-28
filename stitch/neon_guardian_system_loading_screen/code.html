@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neon Guardian - System Initialization</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06e8f9",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#050a0b", // Deepened for pure black feel requested
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #06e8f910 1px, transparent 1px), linear-gradient(to bottom, #06e8f910 1px, transparent 1px)",
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    boxShadow: {
+                        'glow': '0 0 20px -5px var(--tw-shadow-color)',
+                        'glow-lg': '0 0 40px -10px var(--tw-shadow-color)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom utilities for high-tech feel */
+        .cyber-grid {
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(6, 232, 249, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display overflow-hidden h-screen w-screen flex flex-col relative selection:bg-primary selection:text-black">
+<!-- Background Grid Effect -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-20 bg-grid-pattern cyber-grid"></div>
+<!-- Ambient Glow Spots -->
+<div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="layout-container flex h-full w-full items-center justify-center relative z-10">
+<!-- Main Content Card -->
+<div class="layout-content-container flex flex-col w-full max-w-[600px] p-6 md:p-12 items-center justify-center">
+<!-- Logo Section -->
+<div class="relative mb-12 group">
+<!-- Outer Ring Glow -->
+<div class="absolute inset-[-20px] rounded-full border border-primary/20 w-[180px] h-[180px] flex items-center justify-center animate-[spin_10s_linear_infinite]">
+<div class="absolute top-0 w-2 h-2 bg-primary rounded-full shadow-glow shadow-primary"></div>
+<div class="absolute bottom-0 w-2 h-2 bg-primary rounded-full shadow-glow shadow-primary"></div>
+<div class="absolute left-0 w-2 h-2 bg-primary rounded-full shadow-glow shadow-primary"></div>
+<div class="absolute right-0 w-2 h-2 bg-primary rounded-full shadow-glow shadow-primary"></div>
+</div>
+<!-- Middle Ring -->
+<div class="absolute inset-[-10px] rounded-full border border-primary/40 border-dashed w-[160px] h-[160px] flex items-center justify-center animate-[spin_15s_linear_infinite_reverse]"></div>
+<!-- Central Logo Container -->
+<div class="w-[140px] h-[140px] bg-background-dark/80 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-primary/50 shadow-glow-lg shadow-primary/40 relative z-10 overflow-hidden">
+<!-- Abstract Logo Image -->
+<div class="w-full h-full bg-cover bg-center opacity-80 mix-blend-screen" data-alt="Futuristic neon cyber eye logo" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAW3Ch10MYpA--yN3o28jLDcyB4xuNEdK0cpyHH5KZHBUHzI-qMYc_H403kvRATQOTLnrRK2pxoFBJr956zbkdft0_Nf1FKJ2K3Ihz8MQeRkZ6ON0J24Z60z0T6xFmMtB4eiMZcbbwXvOCVPj50lN-Zaou9kmcIewIy0UHWTsSIDOtyLcTlogz6YZ3VqdBX11JW6WV_wmnzORjYboeK5aAAbCJcXQ0sI0tPu8u-d8TYQXcUbU2i--HoVC8yICPO6aZPptc4p44pZnZU');">
+</div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[64px] text-primary drop-shadow-[0_0_15px_rgba(6,232,249,0.8)]">
+                            security
+                        </span>
+</div>
+</div>
+</div>
+<!-- Title -->
+<h1 class="text-white tracking-[0.2em] text-4xl md:text-5xl font-bold leading-tight text-center mb-2 text-glow">
+                NEON GUARDIAN
+            </h1>
+<p class="text-primary/70 text-sm tracking-widest uppercase font-medium mb-10 text-center">
+                AI Traffic Enforcement System v4.0
+            </p>
+<!-- Loading Status -->
+<div class="w-full max-w-md flex flex-col gap-4">
+<div class="flex justify-between items-end px-1">
+<p class="text-slate-300 text-sm font-medium leading-normal flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm animate-pulse">terminal</span>
+<span class="typing-effect">Establishing Neural Link...</span>
+</p>
+<p class="text-primary text-lg font-bold leading-normal font-mono">75%</p>
+</div>
+<!-- Progress Bar -->
+<div class="relative h-3 w-full rounded-full bg-slate-800 overflow-hidden border border-slate-700/50">
+<!-- Background pulses -->
+<div class="absolute inset-0 w-full h-full bg-[linear-gradient(90deg,transparent,rgba(6,232,249,0.1),transparent)] animate-[shimmer_2s_infinite]"></div>
+<!-- Fill -->
+<div class="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary shadow-[0_0_15px_rgba(6,232,249,0.6)] relative" style="width: 75%;">
+<div class="absolute right-0 top-0 bottom-0 w-1 bg-white/50 blur-[1px]"></div>
+</div>
+</div>
+<!-- Sub-status -->
+<div class="flex justify-between items-center px-1 pt-1">
+<div class="flex flex-col gap-1">
+<p class="text-slate-400 text-xs font-normal leading-normal">System Integrity: <span class="text-green-400">Verified</span></p>
+<p class="text-slate-500 text-xs font-normal leading-normal">Encryption: <span class="text-primary/60">AES-256 Enabled</span></p>
+</div>
+<span class="material-symbols-outlined text-primary/30 text-2xl animate-spin">
+                        data_usage
+                    </span>
+</div>
+</div>
+<!-- Footer Logs (Visual Decoration) -->
+<div class="mt-12 w-full max-w-lg border-t border-slate-800 pt-4 flex flex-col gap-1 opacity-60">
+<p class="text-[10px] text-slate-500 font-mono text-center tracking-wider">
+                    Initializing AI Models... | Securing Command Center... | Loading Map Data...
+                </p>
+<p class="text-[10px] text-slate-600 font-mono text-center">
+                    COPYRIGHT © 2024 NEON GUARDIAN ENTERPRISE. AUTHORIZED PERSONNEL ONLY.
+                </p>
+</div>
+</div>
+</div>
+</body></html>

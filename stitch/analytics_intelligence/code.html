@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neon Guardian - Analytics</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Rajdhani:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00F0FF",
+                        "primary-dim": "rgba(0, 240, 255, 0.1)",
+                        "background-dark": "#050A14",
+                        "surface": "rgba(15, 23, 42, 0.6)",
+                        "surface-light": "rgba(30, 41, 59, 0.4)",
+                        "alert": "#FF2A6D",
+                        "success": "#05FFA1",
+                        "text-main": "#E2E8F0",
+                        "text-muted": "#64748B",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Rajdhani", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    boxShadow: {
+                        "neon": "0 0 10px rgba(0, 240, 255, 0.5)",
+                        "neon-sm": "0 0 5px rgba(0, 240, 255, 0.3)",
+                        "glass": "0 4px 30px rgba(0, 0, 0, 0.1)",
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #050A14;
+            color: #E2E8F0;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-panel:hover {
+             border-color: rgba(0, 240, 255, 0.3);
+             box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050A14; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155; 
+        }
+
+        /* Custom Chart Animations */
+        @keyframes scanline {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        .scan-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+            animation: scanline 4s linear infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        /* Neumorphic Toggle */
+        .neu-toggle {
+            background: #0F172A;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5), inset -1px -1px 2px rgba(255,255,255,0.05);
+        }
+        .neu-toggle-btn.active {
+            background: rgba(0, 240, 255, 0.1);
+            color: #00F0FF;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen font-sans selection:bg-primary selection:text-black overflow-x-hidden">
+<!-- Top Navigation (Reused & Adapted) -->
+<header class="flex items-center justify-between border-b border-[#1e293b] bg-[#050A14]/90 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary animate-pulse">
+<svg fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2 17L12 22L22 17" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2 12L12 17L22 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h1 class="font-display font-bold text-2xl tracking-wider text-white">NEON GUARDIAN</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-white/5">
+<div class="size-2 rounded-full bg-success shadow-[0_0_8px_#05FFA1]"></div>
+<span class="font-mono text-xs text-success tracking-wider">SYSTEM ONLINE</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-text-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="size-8 rounded-full bg-gradient-to-tr from-primary to-blue-600 border border-white/20" data-alt="User avatar gradient"></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col w-64 border-r border-[#1e293b] bg-[#050A14] pt-6">
+<nav class="flex flex-col gap-2 px-4">
+<a class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">dashboard</span>
+<span class="font-medium text-sm">Command Center</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">videocam</span>
+<span class="font-medium text-sm">Live Grid</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">warning</span>
+<span class="font-medium text-sm">Violations</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary border-l-2 border-primary rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-xl shadow-neon-sm">analytics</span>
+<span class="font-medium text-sm">Intelligence</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-all group" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">system_update</span>
+<span class="font-medium text-sm">The Core</span>
+</a>
+</nav>
+<div class="mt-auto p-6">
+<div class="glass-panel p-4 rounded-lg">
+<p class="font-display text-xs text-text-muted uppercase tracking-widest mb-2">Server Load</p>
+<div class="flex items-end gap-1 h-8 mb-2">
+<div class="w-1 bg-primary/30 h-full rounded-sm"></div>
+<div class="w-1 bg-primary/40 h-3/4 rounded-sm"></div>
+<div class="w-1 bg-primary/60 h-1/2 rounded-sm"></div>
+<div class="w-1 bg-primary h-5/6 rounded-sm shadow-[0_0_8px_#00F0FF]"></div>
+<div class="w-1 bg-primary/50 h-2/3 rounded-sm"></div>
+</div>
+<div class="flex justify-between font-mono text-xs">
+<span class="text-text-muted">CPU</span>
+<span class="text-primary">42%</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 p-6 lg:p-10 relative overflow-hidden bg-background-dark">
+<!-- Background Decoration -->
+<div class="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-[0.03] pointer-events-none"></div>
+<div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative z-10">
+<div>
+<h2 class="font-display text-3xl font-bold text-white tracking-wide mb-1">SYSTEM INTELLIGENCE</h2>
+<p class="text-text-muted text-sm font-mono">/ ANALYTICS / TRAFFIC_PATTERNS_V2</p>
+</div>
+<div class="flex flex-wrap items-center gap-4">
+<!-- Date Range Picker -->
+<div class="neu-toggle p-1 rounded-lg flex items-center">
+<button class="neu-toggle-btn px-4 py-1.5 rounded text-xs font-mono font-medium text-text-muted hover:text-white transition-all">24H</button>
+<button class="neu-toggle-btn active px-4 py-1.5 rounded text-xs font-mono font-medium transition-all">7D</button>
+<button class="neu-toggle-btn px-4 py-1.5 rounded text-xs font-mono font-medium text-text-muted hover:text-white transition-all">30D</button>
+</div>
+<!-- Export Button -->
+<button class="group relative px-4 py-2 rounded-lg bg-surface border border-white/10 hover:border-primary/50 overflow-hidden transition-all">
+<div class="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+<div class="relative flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">download</span>
+<span class="text-sm font-display font-semibold tracking-wider text-white">EXPORT CSV</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative z-10">
+<!-- KPI Card 1: Total Violations -->
+<div class="glass-panel p-6 rounded-xl relative group overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-primary">gavel</span>
+</div>
+<h3 class="font-display text-text-muted text-sm uppercase tracking-wider mb-2">Total Processed</h3>
+<div class="flex items-baseline gap-3">
+<span class="font-mono text-3xl font-bold text-white">12,450</span>
+<span class="font-mono text-xs text-success flex items-center gap-1 bg-success/10 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[10px]">trending_up</span> +12%
+                        </span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary/50 to-primary w-[75%] rounded-full shadow-[0_0_10px_#00F0FF]"></div>
+</div>
+</div>
+<!-- KPI Card 2: Accuracy -->
+<div class="glass-panel p-6 rounded-xl relative group overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-success">verified</span>
+</div>
+<h3 class="font-display text-text-muted text-sm uppercase tracking-wider mb-2">AI Confidence</h3>
+<div class="flex items-baseline gap-3">
+<span class="font-mono text-3xl font-bold text-white">99.2%</span>
+<span class="font-mono text-xs text-text-muted">avg score</span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-success/50 to-success w-[99%] rounded-full shadow-[0_0_10px_#05FFA1]"></div>
+</div>
+</div>
+<!-- KPI Card 3: Est. Revenue -->
+<div class="glass-panel p-6 rounded-xl relative group overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-alert">payments</span>
+</div>
+<h3 class="font-display text-text-muted text-sm uppercase tracking-wider mb-2">Est. Revenue</h3>
+<div class="flex items-baseline gap-3">
+<span class="font-mono text-3xl font-bold text-white">$450k</span>
+<span class="font-mono text-xs text-text-muted">this cycle</span>
+</div>
+<div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-purple-500 to-purple-400 w-[60%] rounded-full shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
+</div>
+</div>
+<!-- Main Chart: Efficiency (Spans 2 cols on Desktop) -->
+<div class="glass-panel rounded-xl p-6 md:col-span-2 flex flex-col min-h-[360px] scan-effect">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-display text-lg font-bold text-white flex items-center gap-2">
+<span class="w-1 h-4 bg-primary rounded-sm shadow-neon-sm"></span>
+                                ENFORCEMENT EFFICIENCY
+                            </h3>
+<p class="text-xs text-text-muted font-mono mt-1">Detection Rate vs False Positives</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-primary shadow-neon-sm"></span>
+<span class="text-xs text-text-muted font-mono">Detection</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-alert shadow-[0_0_5px_#FF2A6D]"></span>
+<span class="text-xs text-text-muted font-mono">False Pos.</span>
+</div>
+</div>
+</div>
+<!-- Simulated CSS Chart Area -->
+<div class="flex-1 w-full relative border-l border-b border-white/10 p-2">
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-10">
+<div class="w-full h-px bg-white"></div>
+<div class="w-full h-px bg-white"></div>
+<div class="w-full h-px bg-white"></div>
+<div class="w-full h-px bg-white"></div>
+<div class="w-full h-px bg-white"></div>
+</div>
+<!-- Data Visualization Simulation -->
+<div class="relative w-full h-full flex items-end justify-between px-2 gap-1">
+<!-- SVG Path Simulation for Detection Rate (Cyan) -->
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveaspectratio="none">
+<defs>
+<lineargradient id="cyanGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#00F0FF" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#00F0FF" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,150 C50,140 100,60 150,80 C200,100 250,40 300,50 C350,60 400,20 450,30 C500,40 550,10 600,20 L600,200 L0,200 Z" fill="url(#cyanGradient)"></path>
+<path d="M0,150 C50,140 100,60 150,80 C200,100 250,40 300,50 C350,60 400,20 450,30 C500,40 550,10 600,20" fill="none" stroke="#00F0FF" stroke-width="2" style="filter: drop-shadow(0 0 4px #00F0FF);" vector-effect="non-scaling-stroke"></path>
+<!-- SVG Path for False Positives (Red) -->
+<path d="M0,190 C50,185 100,195 150,180 C200,175 250,190 300,185 C350,180 400,188 450,192 C500,190 550,195 600,190" fill="none" stroke="#FF2A6D" stroke-dasharray="4 4" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+</svg>
+</div>
+</div>
+<!-- X Axis Labels -->
+<div class="flex justify-between mt-2 text-[10px] font-mono text-text-muted uppercase px-2">
+<span>Mon</span>
+<span>Tue</span>
+<span>Wed</span>
+<span>Thu</span>
+<span>Fri</span>
+<span>Sat</span>
+<span>Sun</span>
+</div>
+</div>
+<!-- Donut Chart: Violation Distribution -->
+<div class="glass-panel rounded-xl p-6 flex flex-col items-center justify-center relative">
+<h3 class="absolute top-6 left-6 font-display text-lg font-bold text-white flex items-center gap-2">
+<span class="w-1 h-4 bg-primary rounded-sm shadow-neon-sm"></span>
+                        DISTRIBUTION
+                    </h3>
+<div class="relative size-48 mt-8">
+<!-- SVG Donut Simulation -->
+<svg class="size-full -rotate-90" viewbox="0 0 100 100">
+<!-- Speeding (Cyan) -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#1e293b" stroke-width="8"></circle>
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#00F0FF" stroke-dasharray="160 251.2" stroke-dashoffset="0" stroke-width="8" style="filter: drop-shadow(0 0 4px rgba(0,240,255,0.5))"></circle>
+<!-- Red Light (Purple) -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#A855F7" stroke-dasharray="60 251.2" stroke-dashoffset="-165" stroke-width="8"></circle>
+<!-- Wrong Way (Red) -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#FF2A6D" stroke-dasharray="20 251.2" stroke-dashoffset="-230" stroke-width="8"></circle>
+</svg>
+<!-- Center Text -->
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-mono text-2xl font-bold text-white">45%</span>
+<span class="text-[10px] text-text-muted font-display uppercase tracking-widest">Speeding</span>
+</div>
+</div>
+<!-- Legend -->
+<div class="w-full mt-6 space-y-2">
+<div class="flex justify-between items-center text-xs">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-primary shadow-neon-sm"></div>
+<span class="text-text-muted">Speeding</span>
+</div>
+<span class="font-mono text-white">45%</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-purple-500"></div>
+<span class="text-text-muted">Red Light</span>
+</div>
+<span class="font-mono text-white">35%</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-alert"></div>
+<span class="text-text-muted">Wrong Way</span>
+</div>
+<span class="font-mono text-white">20%</span>
+</div>
+</div>
+</div>
+<!-- Heatmap: Temporal Density -->
+<div class="glass-panel rounded-xl p-6 md:col-span-1 xl:col-span-1">
+<h3 class="font-display text-lg font-bold text-white flex items-center gap-2 mb-4">
+<span class="w-1 h-4 bg-primary rounded-sm shadow-neon-sm"></span>
+                        TEMPORAL DENSITY
+                    </h3>
+<p class="text-xs text-text-muted font-mono mb-4">Peak Violation Hours (7 Day Avg)</p>
+<div class="grid grid-cols-6 gap-1.5 h-[200px]">
+<!-- Generating a grid of boxes with varying opacity to simulate heatmap -->
+<!-- Row 1 -->
+<div class="bg-primary/5 rounded-sm"></div><div class="bg-primary/10 rounded-sm"></div><div class="bg-primary/20 rounded-sm"></div><div class="bg-primary/5 rounded-sm"></div><div class="bg-primary/10 rounded-sm"></div><div class="bg-primary/5 rounded-sm"></div>
+<!-- Row 2 -->
+<div class="bg-primary/10 rounded-sm"></div><div class="bg-primary/30 rounded-sm"></div><div class="bg-primary/60 rounded-sm shadow-neon-sm"></div><div class="bg-primary/40 rounded-sm"></div><div class="bg-primary/20 rounded-sm"></div><div class="bg-primary/10 rounded-sm"></div>
+<!-- Row 3 -->
+<div class="bg-primary/5 rounded-sm"></div><div class="bg-primary/20 rounded-sm"></div><div class="bg-primary/50 rounded-sm"></div><div class="bg-primary/80 rounded-sm shadow-neon"></div><div class="bg-primary/30 rounded-sm"></div><div class="bg-primary/10 rounded-sm"></div>
+<!-- Row 4 -->
+<div class="bg-primary/10 rounded-sm"></div><div class="bg-primary/40 rounded-sm"></div><div class="bg-primary/90 rounded-sm shadow-neon"></div><div class="bg-primary/50 rounded-sm"></div><div class="bg-primary/20 rounded-sm"></div><div class="bg-primary/5 rounded-sm"></div>
+<!-- Row 5 -->
+<div class="bg-primary/5 rounded-sm"></div><div class="bg-primary/20 rounded-sm"></div><div class="bg-primary/40 rounded-sm"></div><div class="bg-primary/20 rounded-sm"></div><div class="bg-primary/10 rounded-sm"></div><div class="bg-primary/5 rounded-sm"></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] font-mono text-text-muted">
+<span>00:00</span>
+<span>06:00</span>
+<span>12:00</span>
+<span>18:00</span>
+<span>23:59</span>
+</div>
+</div>
+<!-- Top Locations Bar Chart -->
+<div class="glass-panel rounded-xl p-6 md:col-span-1 xl:col-span-2">
+<h3 class="font-display text-lg font-bold text-white flex items-center gap-2 mb-6">
+<span class="w-1 h-4 bg-primary rounded-sm shadow-neon-sm"></span>
+                        HOTSPOTS
+                    </h3>
+<div class="space-y-4">
+<!-- Location 1 -->
+<div>
+<div class="flex justify-between mb-1 text-xs">
+<span class="text-white font-medium">Main St. &amp; 5th Ave</span>
+<span class="font-mono text-primary">842</span>
+</div>
+<div class="w-full bg-white/5 rounded-full h-2">
+<div class="bg-primary h-2 rounded-full shadow-neon-sm" style="width: 85%"></div>
+</div>
+</div>
+<!-- Location 2 -->
+<div>
+<div class="flex justify-between mb-1 text-xs">
+<span class="text-white font-medium">Broadway &amp; Houston</span>
+<span class="font-mono text-primary">621</span>
+</div>
+<div class="w-full bg-white/5 rounded-full h-2">
+<div class="bg-primary/80 h-2 rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<!-- Location 3 -->
+<div>
+<div class="flex justify-between mb-1 text-xs">
+<span class="text-white font-medium">I-95 Exit 42</span>
+<span class="font-mono text-primary">410</span>
+</div>
+<div class="w-full bg-white/5 rounded-full h-2">
+<div class="bg-primary/60 h-2 rounded-full" style="width: 45%"></div>
+</div>
+</div>
+<!-- Location 4 -->
+<div>
+<div class="flex justify-between mb-1 text-xs">
+<span class="text-white font-medium">Canal St. Tunnel</span>
+<span class="font-mono text-primary">320</span>
+</div>
+<div class="w-full bg-white/5 rounded-full h-2">
+<div class="bg-primary/40 h-2 rounded-full" style="width: 35%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

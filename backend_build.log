@@ -1,0 +1,81 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 382B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:18
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 72B done
+#3 DONE 0.0s
+
+#4 [1/9] FROM docker.io/library/node:18@sha256:c6ae79e38498325db67193d391e6ec1d224d96c693a8a4d943498556716d3783
+#4 resolve docker.io/library/node:18@sha256:c6ae79e38498325db67193d391e6ec1d224d96c693a8a4d943498556716d3783 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 689B done
+#5 DONE 0.0s
+
+#6 [4/9] COPY tsconfig.json ./
+#6 CACHED
+
+#7 [2/9] WORKDIR /app
+#7 CACHED
+
+#8 [3/9] COPY package*.json ./
+#8 CACHED
+
+#9 [5/9] COPY prisma ./prisma/
+#9 CACHED
+
+#10 [6/9] RUN npm install
+#10 0.545 npm warn EBADENGINE Unsupported engine {
+#10 0.545 npm warn EBADENGINE   package: '@prisma/client@7.4.2',
+#10 0.545 npm warn EBADENGINE   required: { node: '^20.19 || ^22.12 || >=24.0' },
+#10 0.545 npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+#10 0.545 npm warn EBADENGINE }
+#10 0.547 npm warn EBADENGINE Unsupported engine {
+#10 0.547 npm warn EBADENGINE   package: 'prisma@7.4.2',
+#10 0.547 npm warn EBADENGINE   required: { node: '^20.19 || ^22.12 || >=24.0' },
+#10 0.547 npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+#10 0.547 npm warn EBADENGINE }
+#10 7.322 npm error code 1
+#10 7.322 npm error path /app/node_modules/prisma
+#10 7.322 npm error command failed
+#10 7.322 npm error command sh -c node scripts/preinstall-entry.js
+#10 7.322 npm error ┌────────────────────────────────────────────────────────────────────┐
+#10 7.322 npm error │    Prisma only supports Node.js versions 20.19+, 22.12+, 24.0+.    │
+#10 7.322 npm error │    Please upgrade your Node.js version.                            │
+#10 7.322 npm error └────────────────────────────────────────────────────────────────────┘
+#10 7.324 npm notice
+#10 7.324 npm notice New major version of npm available! 10.8.2 -> 11.11.0
+#10 7.324 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+#10 7.324 npm notice To update run: npm install -g npm@11.11.0
+#10 7.324 npm notice
+#10 7.324 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-28T13_54_21_965Z-debug-0.log
+#10 ERROR: process "/bin/sh -c npm install" did not complete successfully: exit code: 1
+------
+ > [6/9] RUN npm install:
+7.322 npm error ┌────────────────────────────────────────────────────────────────────┐
+7.322 npm error │    Prisma only supports Node.js versions 20.19+, 22.12+, 24.0+.    │
+7.322 npm error │    Please upgrade your Node.js version.                            │
+7.322 npm error └────────────────────────────────────────────────────────────────────┘
+7.324 npm notice
+7.324 npm notice New major version of npm available! 10.8.2 -> 11.11.0
+7.324 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+7.324 npm notice To update run: npm install -g npm@11.11.0
+7.324 npm notice
+7.324 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-28T13_54_21_965Z-debug-0.log
+------
+Dockerfile:9
+--------------------
+   7 |     COPY prisma ./prisma/
+   8 |     
+   9 | >>> RUN npm install
+  10 |     RUN npx prisma generate
+  11 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm install" did not complete successfully: exit code: 1
