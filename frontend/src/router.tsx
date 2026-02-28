@@ -6,6 +6,9 @@ import { AdminUpdates } from './pages/AdminUpdates';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { Grid } from './pages/Grid';
+import { Logs } from './pages/Logs';
+import { Stats } from './pages/Stats';
 
 export const router = createBrowserRouter([
     {
@@ -30,15 +33,15 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: 'live-monitoring',
-                        element: <div className="p-6 text-white font-mono text-xl">GRID PAGE (WIP)</div>,
+                        element: <Grid />,
                     },
                     {
                         path: 'violations',
-                        element: <div className="p-6 text-white font-mono text-xl">LOGS PAGE (WIP)</div>,
+                        element: <Logs />,
                     },
                     {
                         path: 'analytics',
-                        element: <div className="p-6 text-white font-mono text-xl">STATS PAGE (WIP)</div>,
+                        element: <Stats />,
                     },
                     {
                         path: 'system',

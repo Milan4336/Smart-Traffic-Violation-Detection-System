@@ -9,6 +9,7 @@ export const Sidebar: React.FC = () => {
         { name: 'GRID', icon: Map, path: '/live-monitoring' },
         { name: 'LOGS', icon: Table, path: '/violations' },
         { name: 'STATS', icon: LineChart, path: '/analytics' },
+        { name: 'PATCHES', icon: Settings, path: '/system' },
     ];
 
     return (
@@ -37,15 +38,7 @@ export const Sidebar: React.FC = () => {
                 ))}
             </nav>
             <div className="mt-auto flex flex-col gap-4 w-full px-2">
-                <NavLink
-                    to="/system"
-                    className={({ isActive }) => clsx(
-                        "group flex flex-col items-center gap-1 p-2 rounded hover:bg-white/5 transition-colors",
-                        isActive ? "text-primary" : "text-slate-500 hover:text-white"
-                    )}
-                >
-                    <Settings className="w-7 h-7" />
-                </NavLink>
+                {/* Reserved for bottom aligned items */}
             </div>
         </aside>
     );
