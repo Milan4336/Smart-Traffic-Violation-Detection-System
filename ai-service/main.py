@@ -44,83 +44,129 @@ def stream_reader(cam_id, rtsp_url, lat, lng):
     """
     Connects to the RTSP stream or local video file.
     Runs YOLOv8 detection and posts to the backend upon violation detection.
+    Includes technical stability tracking (FPS, Latency, Freeze Detection).
     """
     print(f"[AI] Initializing capture for {cam_id} via {rtsp_url}")
-    cap = cv2.VideoCapture(rtsp_url)
     
-    # Track heartbeats
-    last_heartbeat = 0
+    retry_count = 0
+    max_retries = 5
     
-    while cap.isOpened():
-        ret, frame = cap.read()
+    while retry_count < max_retries:
+        cap = cv2.VideoCapture(rtsp_url)
         
-        if not ret:
-            print(f"[AI] Stream interrupted for {cam_id}.")
-            break
+        # Stability metrics
+        last_heartbeat = 0
+        frame_times = []
+        last_frame = None
+        freeze_start_time = 0
+        failure_count = 0
+        
+        while cap.isOpened():
+            start_capture = time.time()
+            ret, frame = cap.read()
             
-        current_time = time.time()
-        
-        # Send heartbeat every 10 seconds
-        if current_time - last_heartbeat > 10:
-            try:
-                requests.post(f"{BACKEND_API_URL}/cameras/{cam_id}/heartbeat", timeout=5)
-                last_heartbeat = current_time
-            except Exception as e:
-                print(f"[AI] Failed to send heartbeat for {cam_id}: {e}")
-        
-        # Run YOLO inference
-        results = model(frame, verbose=False)
-        
-        if USING_CUSTOM_MODEL:
-            # Custom Model Classes: 0:car, 1:motorcycle, 2:helmet, 3:license_plate, 4:traffic_light, 5:person
-            detected_objs = [box for box in results[0].boxes if int(box.cls) in [0, 1, 2, 3, 4, 5]]
-        else:
-            # COCO Classes: 0:person, 2:car, 3:motorcycle, 9:traffic_light
-            detected_objs = [box for box in results[0].boxes if int(box.cls) in [0, 2, 3, 9]]
-        
-        # Heuristic rules: if random sample triggers logic and a target object is present
-        if len(detected_objs) > 0 and random.random() < 0.01: # 1% chance per frame for demo
-            best_obj = max(detected_objs, key=lambda b: float(b.conf))
-            confidence = float(best_obj.conf) * 100
+            if not ret:
+                print(f"[AI] Stream interrupted for {cam_id}. Retrying...")
+                break
             
-            violation_types = ["SPEEDING", "RED LIGHT", "WRONG WAY", "NO HELMET", "LANE VIOLATION"]
-            v_type = random.choice(violation_types)
+            # Reset retry on success
+            retry_count = 0
             
-            # Map vehicle type string
-            v_tag = "VEHICLE"
-            cls_id = int(best_obj.cls)
-            if USING_CUSTOM_MODEL:
-                if cls_id == 0: v_tag = "CAR"
-                elif cls_id == 1: v_tag = "MOTORCYCLE"
-                elif cls_id == 5: v_tag = "PERSON"
-            else:
-                if cls_id == 2: v_tag = "CAR"
-                elif cls_id == 3: v_tag = "MOTORCYCLE"
-                elif cls_id == 0: v_tag = "PERSON"
+            current_time = time.time()
+            
+            # FPS Tracking
+            frame_times.append(current_time)
+            if len(frame_times) > 30: frame_times.pop(0)
+            fps = len(frame_times) / (frame_times[-1] - frame_times[0]) if len(frame_times) > 1 else 0
+            
+            # Freeze Detection
+            is_frozen = False
+            if last_frame is not None:
+                # Compare a small centered region for performance
+                h, w = frame.shape[:2]
+                region = frame[h//4:3*h//4, w//4:3*w//4]
+                last_region = last_frame[h//4:3*h//4, w//4:3*w//4]
+                if np.array_equal(region, last_region):
+                    if freeze_start_time == 0: freeze_start_time = current_time
+                    if current_time - freeze_start_time > 5:
+                        is_frozen = True
+                else:
+                    freeze_start_time = 0
+            
+            last_frame = frame.copy()
+            
+            # Latency Tracking (Start of capture to end of inference)
+            inference_start = time.time()
+            results = model(frame, verbose=False)
+            inference_end = time.time()
+            latency_ms = int((inference_end - start_capture) * 1000)
+            
+            # Failures
+            if is_frozen:
+                failure_count += 1
+                if failure_count % 30 == 0: # Log every ~1s if frozen
+                    print(f"[AI] Stream FREEZE detected for {cam_id}")
 
-            payload = {
-                "type": v_type,
-                "plateNumber": generate_mock_plate(),
-                "vehicleType": v_tag,
-                "confidenceScore": str(round(confidence, 1)),
-                "threatScore": str(round(random.uniform(20.0, 95.0), 1)),
-                "cameraId": cam_id,
-                "locationLat": str(lat),
-                "locationLng": str(lng)
-            }
+            # Send heartbeat every 10 seconds
+            if current_time - last_heartbeat > 10:
+                try:
+                    payload = {
+                        "fps": round(fps, 1),
+                        "latency_ms": latency_ms,
+                        "failure_count": failure_count
+                    }
+                    requests.post(f"{BACKEND_API_URL}/cameras/{cam_id}/heartbeat", json=payload, timeout=5)
+                    last_heartbeat = current_time
+                except Exception as e:
+                    print(f"[AI] Failed to send heartbeat for {cam_id}: {e}")
             
-            # Save the frame as jpeg
-            success, buffer = cv2.imencode('.jpg', frame)
-            if success:
-                files = {
-                    "evidenceImage": (f"ev_{cam_id}_{int(time.time())}.jpg", buffer.tobytes(), "image/jpeg")
+            # ... (Rest of the violation detection logic remains the same)
+            if USING_CUSTOM_MODEL:
+                detected_objs = [box for box in results[0].boxes if int(box.cls) in [0, 1, 2, 3, 4, 5]]
+            else:
+                detected_objs = [box for box in results[0].boxes if int(box.cls) in [0, 2, 3, 9]]
+            
+            if len(detected_objs) > 0 and random.random() < 0.01:
+                best_obj = max(detected_objs, key=lambda b: float(b.conf))
+                confidence = float(best_obj.conf) * 100
+                v_type = random.choice(["SPEEDING", "RED LIGHT", "WRONG WAY", "NO HELMET", "LANE VIOLATION"])
+                v_tag = "VEHICLE"
+                cls_id = int(best_obj.cls)
+                if USING_CUSTOM_MODEL:
+                    if cls_id == 0: v_tag = "CAR"
+                    elif cls_id == 1: v_tag = "MOTORCYCLE"
+                    elif cls_id == 5: v_tag = "PERSON"
+                else:
+                    if cls_id == 2: v_tag = "CAR"
+                    elif cls_id == 3: v_tag = "MOTORCYCLE"
+                    elif cls_id == 0: v_tag = "PERSON"
+
+                violation_payload = {
+                    "type": v_type,
+                    "plateNumber": generate_mock_plate(),
+                    "vehicleType": v_tag,
+                    "confidenceScore": str(round(confidence, 1)),
+                    "threatScore": str(round(random.uniform(20.0, 95.0), 1)),
+                    "cameraId": cam_id,
+                    "locationLat": str(lat),
+                    "locationLng": str(lng)
                 }
                 
-                try:
-                    res = requests.post(f"{BACKEND_API_URL}/violations", data=payload, files=files, timeout=10)
-                    print(f"[{cam_id}] Sent Violation: {v_type} | {res.status_code}")
-                except Exception as e:
-                    print(f"[{cam_id}] Post violation error: {e}")
+                success, buffer = cv2.imencode('.jpg', frame)
+                if success:
+                    files = {"evidenceImage": (f"ev_{cam_id}_{int(time.time())}.jpg", buffer.tobytes(), "image/jpeg")}
+                    try:
+                        requests.post(f"{BACKEND_API_URL}/violations", data=violation_payload, files=files, timeout=10)
+                    except Exception as e:
+                        print(f"[{cam_id}] Post violation error: {e}")
+
+        cap.release()
+        retry_count += 1
+        if retry_count < max_retries:
+            print(f"[AI] Attempting reconnect {retry_count}/{max_retries} for {cam_id} in 5s...")
+            time.sleep(5)
+        else:
+            print(f"[AI] Max retries reached for {cam_id}. Marking as OFFLINE.")
 
     cap.release()
     print(f"[AI] Capture terminated for {cam_id}")

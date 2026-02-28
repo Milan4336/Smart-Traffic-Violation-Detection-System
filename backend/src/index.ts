@@ -71,16 +71,13 @@ setInterval(async () => {
 
         if (stalledCameras.length > 0) {
             for (const cam of stalledCameras) {
-                await prisma.camera.update({
+                await (prisma as any).camera.update({
                     where: { id: cam.id },
-                    data: { status: 'OFFLINE', nodeHealth: 'OFFLINE' }
+                    data: { status: 'OFFLINE', healthStatus: 'OFFLINE' }
                 });
                 console.log(`[ALERT] Camera ${cam.name} went OFFLINE.`);
 
                 // Alert Frontend via Redis/WebSocket
-                await initRedisSubscriber.prototype?.getIO?.()?.emit('camera:offline', { id: cam.id });
-                // We'll rely on the pure websocket integration if we can't access it easily here.
-                // Re-importing redisPublisher
                 const { redisPublisher } = require('./redis');
                 if (redisPublisher) {
                     await redisPublisher.publish('camera:offline', JSON.stringify({ id: cam.id, name: cam.name }));

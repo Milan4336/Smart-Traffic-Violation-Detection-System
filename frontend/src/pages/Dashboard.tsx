@@ -112,6 +112,17 @@ export const Dashboard: React.FC = () => {
                 online_cameras: Math.max(0, prev.online_cameras - 1),
                 health: 'CRITICAL'
             }));
+            setCameras(prev => prev.map(c => c.id === (cam.id || cam) ? { ...c, status: 'OFFLINE', healthStatus: 'OFFLINE' } : c));
+        });
+
+        socket.on('camera:degraded', (data) => {
+            const cam = typeof data === 'string' ? JSON.parse(data) : data;
+            setCameras(prev => prev.map(c => c.id === cam.id ? { ...c, healthStatus: 'DEGRADED', currentFps: cam.fps, latencyMs: cam.latency } : c));
+        });
+
+        socket.on('camera:recovered', (data) => {
+            const cam = typeof data === 'string' ? JSON.parse(data) : data;
+            setCameras(prev => prev.map(c => c.id === cam.id ? { ...c, healthStatus: 'HEALTHY', status: 'ONLINE' } : c));
         });
 
         socket.on('fine:generated', (data) => {
@@ -239,13 +250,69 @@ export const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Center Column: Live Map (6 Cols) */}
-            <section className="col-span-6 flex flex-col h-full relative">
-                <h2 className="font-display font-bold text-lg text-white/80 uppercase tracking-widest flex items-center gap-2 mb-4 relative z-10">
-                    <Globe className="text-primary w-4 h-4" /> GEOSPATIAL MATRIX
-                </h2>
-                <div className="flex-1 rounded-lg relative overflow-hidden scanline-effect group border border-slate-700/50">
-                    <LiveMap cameras={cameras} violations={liveAlerts} />
+            {/* Center Column: Live Map & Health Matrix (6 Cols) */}
+            <section className="col-span-6 flex flex-col h-full gap-4 relative">
+                <div className="flex-1 flex flex-col min-h-0">
+                    <h2 className="font-display font-bold text-lg text-white/80 uppercase tracking-widest flex items-center gap-2 mb-4 relative z-10">
+                        <Globe className="text-primary w-4 h-4" /> GEOSPATIAL MATRIX
+                    </h2>
+                    <div className="flex-1 rounded-lg relative overflow-hidden scanline-effect group border border-slate-700/50">
+                        <LiveMap cameras={cameras} violations={liveAlerts} />
+                    </div>
+                </div>
+
+                <div className="h-1/3 glass-panel rounded-lg overflow-hidden flex flex-col border-primary/20">
+                    <div className="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center">
+                        <h3 className="text-xs font-display font-bold text-primary flex items-center gap-2">
+                            <Activity className="w-3.5 h-3.5" /> NODE OPERATIONS MATRIX
+                        </h3>
+                        <span className="text-[10px] font-mono text-slate-500">REAL-TIME STABILITY TRACKING</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-0">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="sticky top-0 bg-[#0f172a] text-[10px] text-slate-500 uppercase font-display border-b border-white/5">
+                                <tr>
+                                    <th className="p-3 font-bold">Node ID</th>
+                                    <th className="p-3 font-bold">FPS</th>
+                                    <th className="p-3 font-bold">Latency</th>
+                                    <th className="p-3 font-bold">Stability</th>
+                                    <th className="p-3 font-bold text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-xs font-mono">
+                                {cameras.map((cam, i) => (
+                                    <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                        <td className="p-3 text-white font-bold">{cam.name}</td>
+                                        <td className="p-3 text-slate-400">{cam.currentFps?.toFixed(1) || '0.0'}</td>
+                                        <td className="p-3 text-slate-400">{cam.latencyMs || '0'}ms</td>
+                                        <td className="p-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={clsx(
+                                                            "h-full transition-all duration-500",
+                                                            cam.healthStatus === 'HEALTHY' ? "bg-success w-full" :
+                                                                cam.healthStatus === 'DEGRADED' ? "bg-warning w-1/2" : "bg-alert w-0"
+                                                        )}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-3 text-right">
+                                            <span className={clsx(
+                                                "px-2 py-0.5 rounded text-[10px] font-bold",
+                                                cam.healthStatus === 'HEALTHY' ? "bg-success/20 text-success border border-success/30" :
+                                                    cam.healthStatus === 'DEGRADED' ? "bg-warning/20 text-warning border border-warning/30" :
+                                                        "bg-alert/20 text-alert border border-alert/30 animate-pulse"
+                                            )}>
+                                                {cam.healthStatus || 'OFFLINE'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 

@@ -55,12 +55,19 @@ model Camera {
   rtspUrl       String?  // New field for Real Cameras
   locationLat   Float
   locationLng   Float
-  status        String   @default("ONLINE") // ONLINE, OFFLINE, MAINTENANCE
+  status        String   @default("ONLINE") // ONLINE, OFFLINE, MAINTENANCE (Admin status)
+  healthStatus  String   @default("HEALTHY") // HEALTHY, DEGRADED, OFFLINE (Technical status)
   lastHeartbeat DateTime @default(now())
-  nodeHealth    String   @default("HEALTHY") // HEALTHY, DELAYED, OFFLINE
+  
+  currentFps    Float?
+  latencyMs     Int?
+  failureCount  Int      @default(0)
+
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
   violations    Violation[]
+  metrics       CameraMetricsDaily[]
 }
 
 model Alert {
@@ -181,6 +188,19 @@ model Vehicle {
 
   violations       Violation[]
   videoViolations  VideoViolation[]
+}
+
+model CameraMetricsDaily {
+  id               String   @id @default(uuid())
+  cameraId         String
+  date             DateTime @default(now())
+  uptimePercentage Float
+  avgFps           Float
+  avgLatency       Int
+  
+  camera           Camera   @relation(fields: [cameraId], references: [id])
+  
+  @@unique([cameraId, date])
 }
 
 model ViolationFineRule {

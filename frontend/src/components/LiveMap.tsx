@@ -10,12 +10,35 @@ interface MapProps {
     violations: any[];
 }
 
-const customIcon = (iconNode: React.ReactNode, type: 'camera' | 'violation') => {
+const customIcon = (iconNode: React.ReactNode, type: 'camera' | 'violation', health?: string) => {
+    let healthColor = 'bg-primary'; // Default for violations etc
+    let pingColor = 'bg-primary opacity-20';
+    let borderColor = 'border-white';
+    let pulseClass = 'animate-ping';
+
+    if (type === 'camera') {
+        if (health === 'DEGRADED') {
+            healthColor = 'bg-warning shadow-neon-warning';
+            pingColor = 'bg-warning opacity-30';
+            pulseClass = ''; // No ping for degraded, just static warning
+        } else if (health === 'OFFLINE') {
+            healthColor = 'bg-alert shadow-neon-alert';
+            pingColor = 'bg-alert opacity-40';
+            pulseClass = 'animate-pulse';
+        } else {
+            healthColor = 'bg-success shadow-neon-success';
+            pingColor = 'bg-success opacity-20';
+        }
+    } else {
+        healthColor = 'bg-alert shadow-neon-alert';
+        pingColor = 'bg-alert opacity-40';
+    }
+
     return new L.DivIcon({
         className: 'bg-transparent border-none',
         html: `<div class="relative flex items-center justify-center pointer-events-none">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${type === 'violation' ? 'bg-alert opacity-40 size-12' : 'bg-primary opacity-20 size-8'}"></span>
-                <div class="relative flex items-center justify-center rounded-full ${type === 'violation' ? 'size-6 bg-alert shadow-neon-alert' : 'size-5 bg-primary shadow-neon'} border-2 border-white text-background-dark">
+                <span class="${pulseClass} absolute inline-flex h-full w-full rounded-full ${pingColor} ${type === 'violation' ? 'size-12' : 'size-8'}"></span>
+                <div class="relative flex items-center justify-center rounded-full ${type === 'violation' ? 'size-6' : 'size-5'} ${healthColor} border-2 ${borderColor} text-background-dark">
                     ${renderToString(iconNode)}
                 </div>
                </div>`,
@@ -50,7 +73,7 @@ export const LiveMap: React.FC<MapProps> = ({ cameras, violations }) => {
                 <Marker
                     key={cam.id}
                     position={[cam.locationLat, cam.locationLng]}
-                    icon={customIcon(<Camera size={12} strokeWidth={3} />, 'camera')}
+                    icon={customIcon(<Camera size={12} strokeWidth={3} />, 'camera', cam.healthStatus)}
                 >
                     <Popup className="cyber-popup">
                         <div className="font-mono text-xs p-1">

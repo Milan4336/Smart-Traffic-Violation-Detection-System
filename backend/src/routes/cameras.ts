@@ -20,15 +20,24 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 // GET /api/cameras/status - Return statistics for system metrics panel
 router.get('/status', authenticateToken, async (req: Request, res: Response) => {
     try {
-        const online = await prisma.camera.count({ where: { status: 'ONLINE' } });
-        const offline = await prisma.camera.count({ where: { status: 'OFFLINE' } });
-        const latencyCameras = await prisma.camera.count({ where: { nodeHealth: 'DELAYED' } });
+        const online = await (prisma as any).camera.count({ where: { status: 'ONLINE' } });
+        const offline = await (prisma as any).camera.count({ where: { status: 'OFFLINE' } });
+        const degraded = await (prisma as any).camera.count({ where: { healthStatus: 'DEGRADED' } });
+
+        const avgStats = await (prisma as any).camera.aggregate({
+            _avg: {
+                currentFps: true,
+                latencyMs: true
+            }
+        });
 
         res.json({
             online_cameras: online,
             offline_cameras: offline,
-            latency_issues: latencyCameras,
-            health: online > 0 && offline === 0 ? 'OPTIMAL' : (offline > 0 ? 'CRITICAL' : 'WARNING')
+            degraded_cameras: degraded,
+            avg_fps: avgStats._avg.currentFps || 0,
+            avg_latency: avgStats._avg.latencyMs || 0,
+            health: online > 0 && offline === 0 && degraded === 0 ? 'OPTIMAL' : (offline > 0 ? 'CRITICAL' : 'WARNING')
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch camera status' });
@@ -40,15 +49,18 @@ router.post('/register', authenticateToken, requireClearance(4), async (req: Aut
     try {
         const { name, rtsp_url, location_lat, location_lng } = req.body;
 
-        const camera = await prisma.camera.create({
+        const camera = await (prisma as any).camera.create({
             data: {
                 name,
                 rtspUrl: rtsp_url,
-                locationLat: location_lat,
-                locationLng: location_lng,
+                locationLat: parseFloat(location_lat),
+                locationLng: parseFloat(location_lng),
                 status: 'ONLINE',
-                nodeHealth: 'HEALTHY',
-                lastHeartbeat: new Date()
+                healthStatus: 'HEALTHY',
+                lastHeartbeat: new Date(),
+                currentFps: 0,
+                latencyMs: 0,
+                failureCount: 0
             }
         });
 
@@ -71,18 +83,39 @@ router.post('/register', authenticateToken, requireClearance(4), async (req: Aut
 // POST /api/cameras/:id/heartbeat - Unauthenticated endpoint for AI Service to ping
 router.post('/:id/heartbeat', async (req: Request, res: Response): Promise<any> => {
     try {
-        const camera = await prisma.camera.update({
-            where: { id: req.params.id as string },
+        const { fps, latency_ms, failure_count } = req.body;
+        const camId = req.params.id as string;
+
+        const cameraBefore = await (prisma as any).camera.findUnique({ where: { id: camId } });
+        const technicalStatus = (fps && fps < 10) || (latency_ms && latency_ms > 500) ? 'DEGRADED' : 'HEALTHY';
+
+        const camera = await (prisma as any).camera.update({
+            where: { id: camId },
             data: {
                 lastHeartbeat: new Date(),
                 status: 'ONLINE',
-                nodeHealth: 'HEALTHY'
+                healthStatus: technicalStatus,
+                currentFps: fps ? parseFloat(fps) : undefined,
+                latencyMs: latency_ms ? parseInt(latency_ms) : undefined,
+                failureCount: failure_count !== undefined ? parseInt(failure_count) : undefined
             }
         });
-        res.json({ success: true, camera });
+
+        // Broadcast events
+        if (technicalStatus === 'HEALTHY' && cameraBefore?.healthStatus !== 'HEALTHY') {
+            await redisPublisher.publish('camera:recovered', JSON.stringify({ id: camId, name: camera.name }));
+        } else if (technicalStatus === 'DEGRADED' && cameraBefore?.healthStatus !== 'DEGRADED') {
+            await redisPublisher.publish('camera:degraded', JSON.stringify({
+                id: camId,
+                name: camera.name,
+                fps,
+                latency: latency_ms
+            }));
+        }
+
+        res.json({ success: true, health: technicalStatus });
     } catch (error) {
-        // Silently fail if camera ID doesn't exist
-        res.status(404).json({ error: 'Camera not found' });
+        res.status(404).json({ error: 'Camera not found or update failed' });
     }
 });
 
