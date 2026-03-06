@@ -6,6 +6,8 @@ import { Button } from '../components/ui/Button';
 
 export const VideoDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const backendUrl = apiUrl.replace('/api', '');
     const [video, setVideo] = useState<any>(null);
     const [currentTime, setCurrentTime] = useState(0);
     const [playing, setPlaying] = useState(false);
@@ -14,7 +16,6 @@ export const VideoDetails: React.FC = () => {
 
     const fetchVideoDetails = async () => {
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const res = await fetch(`${apiUrl}/videos/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
@@ -57,8 +58,6 @@ export const VideoDetails: React.FC = () => {
             INITIALIZING SECURE VIDEO DECODER...
         </div>
     );
-
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
     return (
         <div className="p-6 h-full flex flex-col gap-6 overflow-hidden">

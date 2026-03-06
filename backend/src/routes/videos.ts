@@ -1,15 +1,22 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../prisma';
-import { redisPublisher } from '../redis';
+import { publishJson, pushJsonToQueue } from '../redis';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { updateOrCreateVehicle, calculateFine, createAlertIfNeeded } from '../services/enforcement';
+import { updateOrCreateVehicle, calculateFine, normalizeViolationType } from '../services/enforcement';
+import { updateMetric } from '../services/metrics';
 import crypto from 'crypto';
 
 const router = Router();
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || 'internal-secret-123';
+const VIDEO_DUPLICATE_WINDOW_SECONDS = 2;
+const normalizePlateNumber = (value?: string | null): string | null => {
+    if (!value) return null;
+    const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return cleaned || null;
+};
 
 // Middleware to check internal API key
 const authenticateInternal = (req: any, res: Response, next: any) => {
@@ -65,11 +72,11 @@ router.post('/upload', authenticateToken, upload.single('video'), async (req: Au
         });
 
         // Push to Redis queue for AI processing
-        await redisPublisher.lpush('video:queue', JSON.stringify({
+        await pushJsonToQueue('video:queue', {
             videoId: video.id,
-            filePath: path.join(__dirname, '../../', video.filePath),
+            filePath: path.join('/app', video.filePath.replace(/^\/+/, '')),
             userId: req.user!.id
-        }));
+        });
 
         res.status(201).json(video);
     } catch (error) {
@@ -96,11 +103,52 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
     }
 });
 
+// GET /api/videos/violations/:violationId/evidence - Evidence payload for video violation rows
+router.get('/violations/:violationId/evidence', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const { violationId } = req.params;
+        const violation = await prisma.videoViolation.findUnique({
+            where: { id: violationId as string },
+            include: {
+                video: true
+            }
+        });
+
+        if (!violation) {
+            return res.status(404).json({ error: 'Video violation not found' });
+        }
+
+        if (violation.video.uploadedBy !== req.user!.id && req.user!.role.toUpperCase() !== 'ADMIN') {
+            return res.status(403).json({ error: 'Access denied for this evidence' });
+        }
+
+        res.json({
+            source: 'VIDEO_UPLOAD',
+            imageUrl: violation.evidenceImagePath,
+            videoUrl: violation.evidenceVideoPath || violation.video.filePath,
+            timestampSeconds: violation.videoTimestampSeconds ?? violation.frameTimestamp,
+            boundingBox: violation.boundingBox,
+            metadata: {
+                plateNumber: violation.plateNumber,
+                type: normalizeViolationType(violation.violationType),
+                confidence: violation.confidenceScore,
+                cameraId: 'VIDEO_UPLOAD',
+                cameraName: 'Uploaded Video',
+                location: { lat: null, lng: null },
+                time: violation.createdAt,
+                fineAmount: violation.fineAmount
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch video evidence' });
+    }
+});
+
 // GET /api/videos/:id - Get specific video details with violations
 router.get('/:id', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
     try {
         const { id } = req.params;
-        const video = await (prisma as any).uploadedVideo.findUnique({
+        const video = await prisma.uploadedVideo.findUnique({
             where: { id: id as string },
             include: {
                 violations: {
@@ -112,6 +160,10 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res: Response): P
 
         if (!video) {
             return res.status(404).json({ error: 'Video not found' });
+        }
+
+        if (video.uploadedBy !== req.user!.id && req.user!.role.toUpperCase() !== 'ADMIN') {
+            return res.status(403).json({ error: 'Access denied for this video' });
         }
 
         res.json(video);
@@ -132,21 +184,21 @@ router.patch('/:id/status', authenticateInternal, async (req: Request, res: Resp
         if (status === 'completed') {
             updateData.processedAt = new Date();
         }
-        if (durationSeconds) {
+        if (durationSeconds !== undefined && durationSeconds !== null) {
             updateData.durationSeconds = parseFloat(durationSeconds);
         }
 
-        const video = await (prisma as any).uploadedVideo.update({
+        const video = await prisma.uploadedVideo.update({
             where: { id },
             data: updateData
         });
 
         // Notify frontend via Redis/Socket
-        await redisPublisher.publish('video:status', JSON.stringify({
+        await publishJson('video:status', {
             videoId: id,
             status,
             userId: video.uploadedBy
-        }));
+        });
 
         res.json(video);
     } catch (error) {
@@ -158,33 +210,70 @@ router.patch('/:id/status', authenticateInternal, async (req: Request, res: Resp
 router.post('/:id/violations', authenticateInternal, async (req: Request, res: Response): Promise<any> => {
     try {
         const id = req.params.id as string;
-        const { violationType, confidenceScore, frameTimestamp, plateNumber, boundingBox, evidenceImagePath } = req.body;
+        const { violationType, confidenceScore, frameTimestamp, plateNumber, boundingBox, evidenceImagePath, dedupKey } = req.body;
+        const normalizedType = normalizeViolationType(violationType);
+        const normalizedPlate = normalizePlateNumber(plateNumber);
+        const parsedFrameTimestamp = parseFloat(frameTimestamp);
+        const parsedConfidence = parseFloat(confidenceScore);
+        const parsedBoundingBox = boundingBox ? (typeof boundingBox === 'string' ? JSON.parse(boundingBox) : boundingBox) : null;
+        const parsedDedupKey = typeof dedupKey === 'string' ? dedupKey.slice(0, 128) : null;
 
-        const violation = await (prisma as any).videoViolation.create({
+        if (!normalizedType || Number.isNaN(parsedFrameTimestamp) || Number.isNaN(parsedConfidence)) {
+            return res.status(400).json({ error: 'Invalid violation payload' });
+        }
+
+        const duplicateWhere: any = {
+            videoId: id,
+            violationType: normalizedType,
+            frameTimestamp: {
+                gte: parsedFrameTimestamp - VIDEO_DUPLICATE_WINDOW_SECONDS,
+                lte: parsedFrameTimestamp + VIDEO_DUPLICATE_WINDOW_SECONDS
+            }
+        };
+        if (normalizedPlate) {
+            duplicateWhere.plateNumber = normalizedPlate;
+        } else if (parsedDedupKey) {
+            duplicateWhere.dedupKey = parsedDedupKey;
+        }
+
+        const duplicate = await prisma.videoViolation.findFirst({
+            where: duplicateWhere,
+            orderBy: { createdAt: 'desc' }
+        });
+
+        if (duplicate) {
+            return res.status(200).json({
+                duplicate: true,
+                violationId: duplicate.id
+            });
+        }
+
+        // Ensure vehicle row exists before creating VideoViolation (FK on plateNumber).
+        let vehicle = null;
+        if (normalizedPlate) {
+            vehicle = await updateOrCreateVehicle(prisma, normalizedPlate);
+        }
+
+        const violation = await prisma.videoViolation.create({
             data: {
                 videoId: id,
-                violationType,
-                confidenceScore: parseFloat(confidenceScore),
-                frameTimestamp: parseFloat(frameTimestamp),
-                videoTimestampSeconds: req.body.videoTimestampSeconds ? parseFloat(req.body.videoTimestampSeconds) : parseFloat(frameTimestamp),
-                plateNumber,
-                boundingBox: boundingBox ? (typeof boundingBox === 'string' ? JSON.parse(boundingBox) : boundingBox) : null,
+                violationType: normalizedType,
+                confidenceScore: parsedConfidence,
+                frameTimestamp: parsedFrameTimestamp,
+                videoTimestampSeconds: req.body.videoTimestampSeconds ? parseFloat(req.body.videoTimestampSeconds) : parsedFrameTimestamp,
+                plateNumber: normalizedPlate,
+                boundingBox: parsedBoundingBox,
+                dedupKey: parsedDedupKey,
                 evidenceImagePath,
                 evidenceVideoPath: req.body.evidenceVideoPath || null
             }
         });
 
-        // Feature 1: Repeat Offender Detection
-        let vehicle = null;
-        if (plateNumber) {
-            vehicle = await updateOrCreateVehicle(prisma, plateNumber);
-        }
-
         // Feature 2: Automatic Fine Calculation
-        const fineAmount = await calculateFine(prisma, violationType, vehicle?.totalViolations || 0);
+        const fineAmount = await calculateFine(prisma, normalizedType, vehicle?.totalViolations || 0);
 
         // Update violation with fine info
-        await (prisma as any).videoViolation.update({
+        await prisma.videoViolation.update({
             where: { id: violation.id },
             data: {
                 fineAmount,
@@ -194,27 +283,33 @@ router.post('/:id/violations', authenticateInternal, async (req: Request, res: R
         });
 
         // Notify frontend
-        const enrichedViolation = await (prisma as any).videoViolation.findUnique({
+        const enrichedViolation = await prisma.videoViolation.findUnique({
             where: { id: violation.id },
             include: { vehicle: true }
         });
 
-        const videoRecord = await (prisma as any).uploadedVideo.findUnique({ where: { id } });
-        await redisPublisher.publish('video:violation', JSON.stringify({
+        const videoRecord = await prisma.uploadedVideo.findUnique({ where: { id } });
+        await publishJson('video:violation', {
             videoId: id,
             violation: enrichedViolation,
             userId: videoRecord?.uploadedBy
-        }));
+        });
 
         // Emit fine generated event
-        await redisPublisher.publish('fine:generated', JSON.stringify({
+        await publishJson('fine:generated', {
             violationId: violation.id,
             fineAmount,
-            plateNumber
-        }));
+            plateNumber: normalizedPlate
+        });
 
-        // Feature 3: Critical alerts
-        await createAlertIfNeeded(prisma, enrichedViolation, vehicle);
+        await updateMetric('violations_today', 1);
+        await updateMetric('violations_hour', 1);
+        if (fineAmount > 0) {
+            await updateMetric('fines_today', fineAmount);
+        }
+        if (vehicle && vehicle.totalViolations > 1) {
+            await updateMetric('repeat_offenders_today', 1);
+        }
 
         res.status(201).json(enrichedViolation);
     } catch (error) {

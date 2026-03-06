@@ -13,13 +13,24 @@ model User {
   name            String
   email           String     @unique
   passwordHash    String
-  role            String     // admin, officer, analyst
+  role            String     // ADMIN, OFFICER, ANALYST, VIEWER
   clearanceLevel  Int        // 1, 2, 3, 4
+  isActive        Boolean    @default(true)
   createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
   lastLogin       DateTime?
   auditLogs       AuditLog[]
   verifiedViolations Violation[] @relation("VerifiedBy")
+  reviewedViolations Violation[] @relation("ReviewedBy")
   uploadedVideos  UploadedVideo[]
+  reports         Report[]   @relation("GeneratedReports")
+}
+
+enum ReviewStatus {
+  DETECTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
 }
 
 model Violation {
@@ -36,7 +47,15 @@ model Violation {
   evidenceVideoPath String?
   videoTimestampSeconds Float?
   boundingBox      Json?
-  status           String   @default("pending") // pending, verified, rejected, dispatched
+  dedupKey         String?
+  status           String   @default("pending") // pending, verified, rejected, dispatched (legacy)
+  
+  // Feature 14: Review Workflow
+  reviewStatus     ReviewStatus @default(DETECTED)
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  reviewNotes      String?
+  
   createdAt        DateTime @default(now())
   verifiedBy       String?
   verifiedAt       DateTime?
@@ -47,8 +66,36 @@ model Violation {
 
   camera           Camera   @relation(fields: [cameraId], references: [id])
   verifier         User?    @relation("VerifiedBy", fields: [verifiedBy], references: [id])
+  reviewer         User?    @relation("ReviewedBy", fields: [reviewedBy], references: [id])
   alerts           Alert[]
   vehicle          Vehicle? @relation(fields: [plateNumber], references: [plateNumber])
+  reports          Report[]
+
+  @@index([plateNumber])
+  @@index([createdAt])
+  @@index([type])
+  @@index([cameraId])
+  @@index([fineStatus])
+  @@index([reviewStatus])
+  @@index([dedupKey])
+}
+
+model Report {
+  id           String    @id @default(uuid())
+  violationId  String
+  generatedBy  String
+  fileName     String
+  format       String    @default("PDF")
+  sizeBytes    Int
+  createdAt    DateTime  @default(now())
+
+  violation    Violation @relation(fields: [violationId], references: [id])
+  user         User      @relation("GeneratedReports", fields: [generatedBy], references: [id])
+
+  @@index([violationId])
+  @@index([generatedBy])
+  @@index([createdAt])
+  @@map("reports")
 }
 
 model Camera {
@@ -93,6 +140,7 @@ model AuditLog {
   action    String
   entity    String
   entityId  String
+  details   String?
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
@@ -172,6 +220,7 @@ model VideoViolation {
   videoTimestampSeconds Float?
   plateNumber        String?
   boundingBox        Json?
+  dedupKey           String?
   evidenceImagePath  String?
   evidenceVideoPath  String?
   createdAt          DateTime @default(now())
@@ -182,6 +231,8 @@ model VideoViolation {
 
   video              UploadedVideo @relation(fields: [videoId], references: [id])
   vehicle            Vehicle?      @relation(fields: [plateNumber], references: [plateNumber])
+
+  @@index([dedupKey])
 }
 
 model Vehicle {
@@ -190,12 +241,19 @@ model Vehicle {
   totalViolations  Int      @default(0)
   riskLevel        String   @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
   isBlacklisted    Boolean  @default(false)
+  isWatchlisted    Boolean  @default(false)
+  blacklistReason  String?
+  blacklistedBy    String?
+  blacklistedAt    DateTime?
   lastViolationAt  DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   violations       Violation[]
   videoViolations  VideoViolation[]
+
+  @@index([riskLevel])
+  @@index([isBlacklisted])
 }
 
 model CameraMetricsDaily {
@@ -217,4 +275,11 @@ model ViolationFineRule {
   baseAmount       Int
   repeatMultiplier Float    @default(1.0)
   createdAt        DateTime @default(now())
+}
+
+model SystemMetric {
+  id          String   @id @default(uuid())
+  metricName  String   @unique
+  metricValue Int      @default(0)
+  lastUpdated DateTime @default(now())
 }

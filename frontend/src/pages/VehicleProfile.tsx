@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Car, Target, ShieldAlert, Activity, MapPin, Calendar, Clock,
-    ArrowLeft, ExternalLink, Ban, Flag, TrendingUp, AlertTriangle,
-    CheckCircle, Info, DollarSign, Camera
+    Car, ShieldAlert, Activity, MapPin,
+    ArrowLeft, Ban, Flag, TrendingUp, AlertTriangle,
+    DollarSign, Camera
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -59,11 +59,23 @@ export const VehicleProfile: React.FC = () => {
 
     const handleToggleBlacklist = async () => {
         try {
-            const res = await axios.patch(`${apiUrl}/vehicles/${plateNumber}/blacklist`,
-                { isBlacklisted: !profile.summary.isBlacklisted },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setProfile({ ...profile, summary: { ...profile.summary, isBlacklisted: res.data.isBlacklisted, riskLevel: res.data.riskLevel } });
+            if (profile.summary.isBlacklisted) {
+                // Remove from blacklist
+                const res = await axios.delete(`${apiUrl}/vehicles/${plateNumber}/blacklist`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setProfile({ ...profile, summary: { ...profile.summary, isBlacklisted: false, blacklistReason: null, riskLevel: res.data.riskLevel } });
+            } else {
+                // Add to blacklist
+                const reason = window.prompt("Enter reason for blacklisting this vehicle:");
+                if (!reason) return; // Cancelled or empty
+
+                const res = await axios.post(`${apiUrl}/vehicles/${plateNumber}/blacklist`,
+                    { reason },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setProfile({ ...profile, summary: { ...profile.summary, isBlacklisted: true, blacklistReason: reason, blacklistedAt: new Date(), riskLevel: res.data.riskLevel } });
+            }
         } catch (err) {
             console.error("Failed to update blacklist status", err);
         }
@@ -175,12 +187,27 @@ export const VehicleProfile: React.FC = () => {
                                 </div>
                             </div>
 
-                            {(isRepeatOffender || isCriticalOffender) && (
+                            {(isRepeatOffender || isCriticalOffender || summary.isBlacklisted) && (
                                 <div className={clsx(
-                                    "p-3 rounded border font-display font-black text-center text-xs tracking-widest animate-pulse",
-                                    isCriticalOffender ? "bg-alert text-white border-alert/50" : "bg-warning/20 text-warning border-warning/30"
+                                    "p-3 rounded border font-display font-black text-center text-[10px] tracking-widest",
+                                    summary.isBlacklisted ? "bg-alert text-white border-alert animate-pulse" :
+                                        isCriticalOffender ? "bg-alert/20 text-alert border-alert/50" : "bg-warning/20 text-warning border-warning/30"
                                 )}>
-                                    {isCriticalOffender ? 'CRITICAL OFFENDER ALERT' : 'REPEAT OFFENDER DETECTED'}
+                                    {summary.isBlacklisted ? 'BLACKLISTED VEHICLE DETECTED' : isCriticalOffender ? 'CRITICAL OFFENDER ALERT' : 'REPEAT OFFENDER DETECTED'}
+                                </div>
+                            )}
+
+                            {summary.isBlacklisted && (
+                                <div className="bg-alert/5 border border-alert/30 p-3 rounded-lg mt-4 space-y-2">
+                                    <div className="flex items-center gap-2 text-alert font-bold text-xs uppercase tracking-widest border-b border-alert/20 pb-2">
+                                        <Ban size={14} /> ACTIVE BLACKLIST
+                                    </div>
+                                    <div className="text-[10px] font-mono text-slate-300">
+                                        <span className="text-slate-500 mr-2">REASON:</span> {summary.blacklistReason || 'Not specified'}
+                                    </div>
+                                    <div className="text-[10px] font-mono text-slate-300">
+                                        <span className="text-slate-500 mr-2">LOGGED:</span> {summary.blacklistedAt ? new Date(summary.blacklistedAt).toLocaleString() : 'N/A'}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -343,14 +370,25 @@ export const VehicleProfile: React.FC = () => {
                                                 <div className="text-white font-black">₹{v.fineAmount.toLocaleString()}</div>
                                             </td>
                                             <td className="p-4 text-right">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="text-[8px] font-bold h-7"
-                                                    onClick={() => setSelectedViolationId(v.id)}
-                                                >
-                                                    AUDIT
-                                                </Button>
+                                                {v.source === 'LIVE' ? (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-[8px] font-bold h-7"
+                                                        onClick={() => setSelectedViolationId(v.id)}
+                                                    >
+                                                        AUDIT
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-[8px] font-bold h-7"
+                                                        onClick={() => navigate(`/videos/${v.videoId}`)}
+                                                    >
+                                                        OPEN VIDEO
+                                                    </Button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

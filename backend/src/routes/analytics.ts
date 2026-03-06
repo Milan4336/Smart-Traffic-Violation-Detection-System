@@ -36,13 +36,17 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
             where: { status: 'ONLINE' }
         });
 
+        const payload = {
+            totalViolations,
+            todayViolations,
+            activeCameras,
+            avgConfidence: aiConfidenceAverage,
+            aiConfidenceAverage
+        };
+
         res.json({
-            metrics: {
-                totalViolations,
-                todayViolations,
-                activeCameras,
-                aiConfidenceAverage
-            }
+            ...payload,
+            metrics: payload
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch analytics' });

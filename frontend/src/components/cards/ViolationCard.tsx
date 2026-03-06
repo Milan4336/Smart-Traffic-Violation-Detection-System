@@ -15,6 +15,7 @@ export interface ViolationCardProps {
     vehicle?: {
         totalViolations: number;
         riskLevel: string;
+        isBlacklisted?: boolean;
     } | null;
     onClick?: () => void;
     onPlateClick?: () => void;
@@ -24,6 +25,7 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
     plate, type, confidence, status = 'pending', vehicle, fineAmount, fineStatus, onClick, onPlateClick
 }) => {
     const isRepeatOffender = vehicle && vehicle.totalViolations >= 3;
+    const isBlacklisted = vehicle && vehicle.isBlacklisted;
 
 
     return (
@@ -51,7 +53,11 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
                         >
                             {plate}
                         </span>
-                        {isRepeatOffender && (
+                        {isBlacklisted ? (
+                            <span className="text-[8px] font-bold bg-alert text-white px-2 py-0.5 rounded shadow-[0_0_8px_rgba(255,51,102,0.6)] animate-pulse">
+                                BLACKLISTED
+                            </span>
+                        ) : isRepeatOffender && (
                             <span className="text-[8px] font-bold bg-alert/20 text-alert px-1 border border-alert/30 rounded animate-pulse">
                                 REPEAT OFFENDER
                             </span>

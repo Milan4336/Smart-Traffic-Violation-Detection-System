@@ -33,10 +33,19 @@ export const VideoUpload: React.FC = () => {
         const handleStatusUpdate = (data: any) => {
             setVideos(prev => prev.map(v => v.id === data.videoId ? { ...v, status: data.status } : v));
         };
+        const handleVideoViolation = (data: any) => {
+            setVideos(prev => prev.map(v => (
+                v.id === data.videoId
+                    ? { ...v, _count: { violations: (v._count?.violations || 0) + 1 } }
+                    : v
+            )));
+        };
 
         socket.on('video:status', handleStatusUpdate);
+        socket.on('video:violation', handleVideoViolation);
         return () => {
             socket.off('video:status', handleStatusUpdate);
+            socket.off('video:violation', handleVideoViolation);
         };
     }, []);
 

@@ -1,4 +1,11 @@
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+import { updateMetric } from './metrics';
+import { publishJson } from '../redis';
+
+export const normalizeViolationType = (value?: string | null): string => {
+    if (!value) return 'UNKNOWN';
+    return value.toUpperCase().replace(/\s+/g, '_');
+};
 
 export const calculateRiskLevel = (violationCount: number): RiskLevel => {
     if (violationCount >= 11) return 'CRITICAL';
@@ -11,11 +18,13 @@ export const calculateRiskLevel = (violationCount: number): RiskLevel => {
  * Calculates the fine amount based on base rules and repeat offender status.
  */
 export const calculateFine = async (prisma: any, violationType: string, vehicleCount: number) => {
+    const normalizedType = normalizeViolationType(violationType);
+
     // Fetch rule
     const rule = await prisma.violationFineRule.findUnique({
-        where: { violationType: violationType }
+        where: { violationType: normalizedType }
     }) || await prisma.violationFineRule.findUnique({
-        where: { violationType: violationType.toUpperCase() }
+        where: { violationType: violationType }
     });
 
     if (!rule) return 0;
@@ -74,12 +83,21 @@ export const updateOrCreateVehicle = async (prisma: any, plateNumber: string) =>
  */
 export const createAlertIfNeeded = async (prisma: any, violation: any, vehicle: any): Promise<any> => {
     try {
+        if (!violation?.id) {
+            return null;
+        }
+
+        const violationType = normalizeViolationType(violation.type || violation.violationType);
         let alertType: 'CRITICAL' | 'HIGH' | 'MEDIUM' | null = null;
+        let alertReason: string | null = null;
 
         // 1. Critical Type Logic
-        if (
-            violation.type === 'WRONG_WAY' ||
-            vehicle?.isBlacklisted ||
+        if (vehicle?.isBlacklisted) {
+            alertType = 'CRITICAL';
+            alertReason = 'BLACKLISTED_VEHICLE_DETECTED';
+        }
+        else if (
+            violationType === 'WRONG_WAY' ||
             vehicle?.riskLevel === 'CRITICAL'
         ) {
             alertType = 'CRITICAL';
@@ -107,19 +125,21 @@ export const createAlertIfNeeded = async (prisma: any, violation: any, vehicle: 
                 }
             });
 
-            // Publish to Redis for WebSocket broadcast
-            const { redisPublisher } = require('../redis');
-            if (redisPublisher) {
-                await redisPublisher.publish('alert:new', JSON.stringify({
-                    id: alert.id,
-                    violationId: violation.id,
-                    cameraId: alert.cameraId,
-                    plateNumber: alert.plateNumber,
-                    type: violation.type,
-                    alertType: alert.alertType,
-                    timestamp: alert.createdAt
-                }));
+            if (alertType === 'CRITICAL') {
+                await updateMetric('critical_alerts', 1);
             }
+
+            // Publish to Redis for WebSocket broadcast
+            await publishJson('alert:new', {
+                id: alert.id,
+                violationId: violation.id,
+                cameraId: alert.cameraId,
+                plateNumber: alert.plateNumber,
+                type: violationType,
+                alertType: alert.alertType,
+                reason: alertReason,
+                timestamp: alert.createdAt
+            });
 
             console.log(`[ALERT] Created ${alertType} alert for ${violation.plateNumber}`);
             return alert;

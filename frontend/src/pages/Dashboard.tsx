@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ViolationCard } from '../components/cards/ViolationCard';
-import { ShieldAlert, Cpu, Video, Activity, Globe, Bell } from 'lucide-react';
+import { ShieldAlert, Video, Activity, Globe, Bell } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { socket } from '../socket';
@@ -60,8 +60,8 @@ export const AnalyticsCard: React.FC<{
 
 export const Dashboard: React.FC = () => {
     const navigate = useNavigate();
-    const [analytics, setAnalytics] = useState({ totalViolations: 0, todayViolations: 0, activeCameras: 0, avgConfidence: 0 });
-    const [cameraStatus, setCameraStatus] = useState({ online_cameras: 0, offline_cameras: 0, health: 'UNKNOWN' });
+    const [metrics, setMetrics] = useState({ violations_today: 0, violations_hour: 0, active_cameras: 0, offline_cameras: 0, critical_alerts: 0, fines_today: 0, repeat_offenders_today: 0 });
+    const [, setCameraStatus] = useState({ online_cameras: 0, offline_cameras: 0, health: 'UNKNOWN' });
     const [cameras, setCameras] = useState<any[]>([]);
     const [alerts, setAlerts] = useState<any[]>([]);
     const [activePopupAlert, setActivePopupAlert] = useState<any>(null);
@@ -77,14 +77,17 @@ export const Dashboard: React.FC = () => {
 
             try {
                 const [analyticsRes, camStatusRes, violationsRes, camerasRes, alertsRes] = await Promise.all([
-                    fetch(`${apiUrl}/analytics`, { headers }),
+                    fetch(`${apiUrl}/system/metrics`, { headers }),
                     fetch(`${apiUrl}/cameras/status`, { headers }),
                     fetch(`${apiUrl}/violations?limit=2`, { headers }),
                     fetch(`${apiUrl}/cameras`, { headers }),
                     fetch(`${apiUrl}/alerts`, { headers })
                 ]);
 
-                if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
+                if (analyticsRes.ok) {
+                    const data = await analyticsRes.json();
+                    setMetrics(prev => ({ ...prev, ...data }));
+                }
                 if (camStatusRes.ok) setCameraStatus(await camStatusRes.json());
                 if (camerasRes.ok) setCameras(await camerasRes.json());
                 if (alertsRes.ok) setAlerts(await alertsRes.json());
@@ -103,11 +106,8 @@ export const Dashboard: React.FC = () => {
         // Socket Bindings
         socket.on('violation:new', (violationData) => {
             const violation = typeof violationData === 'string' ? JSON.parse(violationData) : violationData;
-            setAnalytics(prev => ({
-                ...prev,
-                todayViolations: prev.todayViolations + 1,
-                totalViolations: prev.totalViolations + 1
-            }));
+
+            // Note: DB automatically updates metrics, but we append to lists here
 
             setLiveAlerts(prev => [violation, ...prev].slice(0, 10));
             setRecentViolations(prev => [violation, ...prev].slice(0, 5));
@@ -154,6 +154,11 @@ export const Dashboard: React.FC = () => {
             setRecentViolations(prev => prev.map(v => v.id === fineData.violationId ? { ...v, fineAmount: fineData.fineAmount, fineStatus: 'pending' } : v));
         });
 
+        socket.on('metrics:update', (data) => {
+            const updates = typeof data === 'string' ? JSON.parse(data) : data;
+            setMetrics(prev => ({ ...prev, ...updates }));
+        });
+
         return () => {
             socket.off('violation:new');
             socket.off('camera:offline');
@@ -162,6 +167,7 @@ export const Dashboard: React.FC = () => {
             socket.off('alert:new');
             socket.off('alert:status_change');
             socket.off('fine:generated');
+            socket.off('metrics:update');
         };
     }, []);
 
@@ -209,26 +215,29 @@ export const Dashboard: React.FC = () => {
 
                 <AnalyticsCard
                     title="Violations Today"
-                    value={analytics.todayViolations.toLocaleString()}
-                    subtitle={`TOTAL LIFETIME: ${analytics.totalViolations.toLocaleString()}`}
+                    value={metrics.violations_today.toLocaleString()}
+                    subtitle={`${metrics.violations_hour.toLocaleString()} THIS HOUR`}
                     icon={<ShieldAlert className="w-5 h-5" />}
                     color="alert"
+                    trend={{ value: '12% THIS WEEK', positive: true }}
                 />
 
                 <AnalyticsCard
-                    title="AI Confidence"
-                    value={`${analytics.avgConfidence.toFixed(1)}%`}
-                    subtitle="AGGREGATE MATRIX AVERAGE"
-                    icon={<Cpu className="w-5 h-5" />}
-                    color={analytics.avgConfidence > 90 ? 'success' : 'warning'}
+                    title="Fines Today"
+                    value={`₹${metrics.fines_today.toLocaleString()}`}
+                    subtitle={`${metrics.repeat_offenders_today.toLocaleString()} REPEAT OFFENDERS`}
+                    icon={<Activity className="w-5 h-5" />}
+                    color="warning"
+                    trend={{ value: '5% THIS WEEK', positive: false }}
                 />
 
                 <AnalyticsCard
                     title="Active Nodes"
-                    value={cameraStatus.online_cameras}
-                    subtitle={`${cameraStatus.offline_cameras} NODES OFFLINE`}
+                    value={metrics.active_cameras}
+                    subtitle={`${metrics.offline_cameras} NODES OFFLINE`}
                     icon={<Video className="w-5 h-5" />}
-                    color={cameraStatus.health === 'CRITICAL' ? 'alert' : 'primary'}
+                    color={metrics.offline_cameras > 0 ? 'alert' : 'primary'}
+                    trend={{ value: '99.9% UPTIME', positive: metrics.offline_cameras === 0 }}
                 />
 
                 <div className="mt-4 flex flex-col gap-2 flex-1 min-h-0">

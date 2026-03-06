@@ -81,7 +81,7 @@ async function main() {
             locationLat: 28.6139,
             locationLng: 77.2090,
             status: 'ONLINE',
-            nodeHealth: 'HEALTHY'
+            healthStatus: 'HEALTHY'
         },
         {
             name: 'MGT Highway Checkpoint',
@@ -89,7 +89,7 @@ async function main() {
             locationLat: 28.6120,
             locationLng: 77.2080,
             status: 'OFFLINE',
-            nodeHealth: 'OFFLINE'
+            healthStatus: 'OFFLINE'
         }
     ];
 

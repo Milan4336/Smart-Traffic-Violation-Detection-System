@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../prisma';
 import { authenticateToken, AuthRequest, requireClearance } from '../middleware/auth';
-import { redisPublisher } from '../redis';
+import { publishJson } from '../redis';
 
 const router = Router();
 
@@ -73,7 +73,7 @@ router.post('/version/create', authenticateToken, requireClearance(4), async (re
             });
 
             // WebSocket event
-            await redisPublisher.publish('system:update_available', JSON.stringify(version));
+            await publishJson('system:update_available', version);
         }
 
         res.status(201).json(version);
@@ -108,12 +108,36 @@ router.post('/patch/add', authenticateToken, requireClearance(4), async (req: Au
 router.get('/changelog', authenticateToken, requireClearance(4), async (req: Request, res: Response) => {
     try {
         const logs = await prisma.systemChangelog.findMany({
-            orderBy: { timestamp: 'desc' },
+            orderBy: { createdAt: 'desc' },
             take: 100
         });
         res.json(logs);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch changelog' });
+    }
+});
+
+// GET /api/system/audit-logs - security/audit trail for privileged users
+router.get('/audit-logs', authenticateToken, requireClearance(3), async (req: Request, res: Response) => {
+    try {
+        const take = Math.min(200, Number(req.query.limit || 100));
+        const logs = await prisma.auditLog.findMany({
+            orderBy: { createdAt: 'desc' },
+            take,
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true
+                    }
+                }
+            }
+        });
+        res.json(logs);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch audit logs' });
     }
 });
 

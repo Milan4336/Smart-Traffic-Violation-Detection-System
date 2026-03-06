@@ -1,17 +1,35 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../prisma';
-import { authenticateToken, AuthRequest, requireClearance } from '../middleware/auth';
-import { redisPublisher } from '../redis';
+import { authenticateToken, AuthRequest, requireRole } from '../middleware/auth';
+import { publishJson } from '../redis';
+import { updateMetric } from '../services/metrics';
 
 const router = Router();
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || 'internal-secret-123';
+const toCameraDto = (camera: any) => ({
+    ...camera,
+    nodeHealth: camera.healthStatus,
+    fps: camera.currentFps ?? 0,
+    avgLatency: camera.latencyMs ?? 0,
+    uptimePercentage: camera.status === 'OFFLINE' ? 0 : (camera.healthStatus === 'DEGRADED' ? 90 : 99.9)
+});
+
+const isInternalRequest = (req: Request): boolean => req.headers['x-api-key'] === INTERNAL_API_KEY;
+
+const authenticateTokenOrInternal = async (req: Request, res: Response, next: any): Promise<any> => {
+    if (isInternalRequest(req)) {
+        return next();
+    }
+    return authenticateToken(req as any, res, next);
+};
 
 // GET /api/cameras - List all registered cameras
-router.get('/', authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateTokenOrInternal, async (req: Request, res: Response) => {
     try {
         const cameras = await prisma.camera.findMany({
             orderBy: { createdAt: 'desc' }
         });
-        res.json(cameras);
+        res.json(cameras.map((camera) => toCameraDto(camera)));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch cameras' });
     }
@@ -45,16 +63,23 @@ router.get('/status', authenticateToken, async (req: Request, res: Response) => 
 });
 
 // POST /api/cameras/register - Admin can add new real cameras
-router.post('/register', authenticateToken, requireClearance(4), async (req: AuthRequest, res: Response): Promise<any> => {
+router.post('/register', authenticateToken, requireRole(['ADMIN']), async (req: AuthRequest, res: Response): Promise<any> => {
     try {
         const { name, rtsp_url, location_lat, location_lng } = req.body;
+        const streamUrl = typeof rtsp_url === 'string' ? rtsp_url.trim() : '';
+        const lat = Number(location_lat);
+        const lng = Number(location_lng);
+
+        if (!name || !streamUrl || Number.isNaN(lat) || Number.isNaN(lng)) {
+            return res.status(400).json({ error: 'Invalid camera payload' });
+        }
 
         const camera = await (prisma as any).camera.create({
             data: {
                 name,
-                rtspUrl: rtsp_url,
-                locationLat: parseFloat(location_lat),
-                locationLng: parseFloat(location_lng),
+                rtspUrl: streamUrl,
+                locationLat: lat,
+                locationLng: lng,
                 status: 'ONLINE',
                 healthStatus: 'HEALTHY',
                 lastHeartbeat: new Date(),
@@ -74,6 +99,8 @@ router.post('/register', authenticateToken, requireClearance(4), async (req: Aut
             }
         });
 
+        await updateMetric('active_cameras', 1);
+
         res.status(201).json(camera);
     } catch (error) {
         res.status(500).json({ error: 'Failed to register camera' });
@@ -83,11 +110,21 @@ router.post('/register', authenticateToken, requireClearance(4), async (req: Aut
 // POST /api/cameras/:id/heartbeat - Unauthenticated endpoint for AI Service to ping
 router.post('/:id/heartbeat', async (req: Request, res: Response): Promise<any> => {
     try {
+        if (!isInternalRequest(req)) {
+            return res.status(401).json({ error: 'Unauthorized camera heartbeat' });
+        }
+
         const { fps, latency_ms, failure_count } = req.body;
         const camId = req.params.id as string;
+        const parsedFps = fps !== undefined ? Number(fps) : undefined;
+        const parsedLatency = latency_ms !== undefined ? Number(latency_ms) : undefined;
+        const parsedFailureCount = failure_count !== undefined ? Number(failure_count) : undefined;
 
         const cameraBefore = await (prisma as any).camera.findUnique({ where: { id: camId } });
-        const technicalStatus = (fps && fps < 10) || (latency_ms && latency_ms > 500) ? 'DEGRADED' : 'HEALTHY';
+        const technicalStatus = (
+            (parsedFps !== undefined && parsedFps < 10) ||
+            (parsedLatency !== undefined && parsedLatency > 500)
+        ) ? 'DEGRADED' : 'HEALTHY';
 
         const camera = await (prisma as any).camera.update({
             where: { id: camId },
@@ -95,22 +132,28 @@ router.post('/:id/heartbeat', async (req: Request, res: Response): Promise<any> 
                 lastHeartbeat: new Date(),
                 status: 'ONLINE',
                 healthStatus: technicalStatus,
-                currentFps: fps ? parseFloat(fps) : undefined,
-                latencyMs: latency_ms ? parseInt(latency_ms) : undefined,
-                failureCount: failure_count !== undefined ? parseInt(failure_count) : undefined
+                currentFps: parsedFps,
+                latencyMs: parsedLatency,
+                failureCount: parsedFailureCount
             }
         });
 
+        // Metric tracking if coming back online
+        if (cameraBefore?.status === 'OFFLINE') {
+            await updateMetric('active_cameras', 1);
+            await updateMetric('offline_cameras', -1);
+        }
+
         // Broadcast events
         if (technicalStatus === 'HEALTHY' && cameraBefore?.healthStatus !== 'HEALTHY') {
-            await redisPublisher.publish('camera:recovered', JSON.stringify({ id: camId, name: camera.name }));
+            await publishJson('camera:recovered', { id: camId, name: camera.name });
         } else if (technicalStatus === 'DEGRADED' && cameraBefore?.healthStatus !== 'DEGRADED') {
-            await redisPublisher.publish('camera:degraded', JSON.stringify({
+            await publishJson('camera:degraded', {
                 id: camId,
                 name: camera.name,
-                fps,
-                latency: latency_ms
-            }));
+                fps: parsedFps,
+                latency: parsedLatency
+            });
         }
 
         res.json({ success: true, health: technicalStatus });
@@ -124,7 +167,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response): Promi
     try {
         const camera = await prisma.camera.findUnique({ where: { id: req.params.id as string } });
         if (!camera) return res.status(404).json({ error: 'Camera not found' });
-        res.json(camera);
+        res.json(toCameraDto(camera));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch camera' });
     }

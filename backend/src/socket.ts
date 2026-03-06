@@ -43,12 +43,17 @@ export const initRedisSubscriber = async () => {
     const topics = [
         'violation:new',
         'violation:verified',
+        'violation:reviewed',
         'camera:offline',
         'camera:degraded',
         'camera:recovered',
         'alert:new',
         'alert:status_change',
-        'fine:generated'
+        'fine:generated',
+        'metrics:update',
+        'video:status',
+        'video:violation',
+        'system:update_available'
     ];
 
     for (const topic of topics) {

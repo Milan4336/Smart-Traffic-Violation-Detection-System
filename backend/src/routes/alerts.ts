@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../prisma';
 import { authenticateToken, AuthRequest, requireClearance } from '../middleware/auth';
-import { redisPublisher } from '../redis';
+import { publishJson } from '../redis';
+import { updateMetric } from '../services/metrics';
 
 const router = Router();
 
@@ -44,14 +45,16 @@ router.patch('/:id/status', authenticateToken, requireClearance(2), async (req: 
             include: { violation: true }
         });
 
-        // Broadcast update via Redis
-        if (redisPublisher) {
-            await redisPublisher.publish('alert:status_change', JSON.stringify({
-                id: alert.id,
-                status: alert.status,
-                plateNumber: alert.plateNumber
-            }));
+        if (status === 'RESOLVED' && alert.alertType === 'CRITICAL') {
+            await updateMetric('critical_alerts', -1);
         }
+
+        // Broadcast update via Redis
+        await publishJson('alert:status_change', {
+            id: alert.id,
+            status: alert.status,
+            plateNumber: alert.plateNumber
+        });
 
         res.json(alert);
     } catch (error) {

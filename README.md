@@ -1,64 +1,87 @@
-# Smart Traffic Violation Detection System (Neon Guardian)
+# Neon Guardian - Smart Traffic Violation Detection System
 
-Neon Guardian is an advanced AI-powered traffic monitoring and violation detection platform. It uses cutting-edge computer vision (YOLOv8) and real-time data processing to identify traffic infractions, manage camera networks, and provide actionable analytics.
+Neon Guardian is an AI-powered traffic enforcement and monitoring platform that ingests live camera feeds and uploaded videos, detects violations, persists evidence, triggers alerts, and updates a real-time command-center dashboard.
 
-## Core Features
+## Platform Workflow
 
-- **Real-Time Monitoring**: Live RTSP stream ingestion with overlayed AI detections.
-- **Automated Violation Detection**: Identifies Red Light, Wrong Way, No Helmet, Triple Riding, and License Plate data.
-- **Repeat Offender Tracking (V1.1)**: Automatic tracking of license plates with dynamic risk level escalation.
-- **Automated Fine Calculation (V1.1)**: Dynamic levy determination based on offense severity and multipliers.
-- **Camera Health Monitoring (V1.2)**: Real-time tracking of node uptime, latency, and FPS with degraded state alerts.
-- **Critical Alert System (V1.2)**: High-severity popup overrides for blacklisted vehicles and critical violations.
-- **Violation Evidence Viewer (V1.3)**: High-precision frame-accurate video playback with bounding box overlays for legal audits.
-- **Vehicle Intelligence Profile (V1.3)**: Deep-dive behavioral dossiers with Recharts analytics and localized Leaflet maps.
-- **Enterprise Video Scanner**: Upload MP4/AVI/MOV files for delayed batch processing with interactive timeline review.
-- **AI Training Pipeline**: Integrated workspace to train, validate, and export custom YOLOv8 models for traffic specific classes.
-- **System Updates Tracker**: Comprehensive patch notes and version management with real-time WebSocket notifications.
-- **Geospatial Analytics**: Interactive mapping of violations and camera nodes.
+`camera/video -> AI detection -> backend ingestion -> database persistence -> websocket events -> live dashboard updates`
+
+## Major Capabilities
+
+- Real-time RTSP/live stream processing with AI overlays.
+- Batch video upload scanning with async queue processing.
+- Violation detection, duplicate suppression, OCR plate extraction, and evidence capture.
+- Repeat offender profiling + risk level escalation.
+- Automatic fine calculation with repeat-offense multipliers.
+- Blacklist/watchlist enforcement + critical alerting.
+- Violation review workflow (`UNDER_REVIEW`, `APPROVED`, `REJECTED`).
+- Role-based access control (`ADMIN`, `OFFICER`, `ANALYST`, `VIEWER`).
+- PDF evidence report generation and report history tracking.
+- Real-time metrics engine and socket-based event broadcasting.
+- Camera heartbeat, latency/FPS health monitoring, and offline detection.
+
+## Frontend Command Center (Current)
+
+- Command-center dashboard with live metrics and activity.
+- New **System Updates page** at `/system-updates`:
+  - Current version banner.
+  - Version history timeline.
+  - Expandable categorized patch notes (`FEATURE`, `IMPROVEMENT`, `FIX`, `SECURITY`, `PERFORMANCE`).
+- New **System Status page** at `/system-status`:
+  - Service health cards (System, AI, Cameras, DB, Redis, API, Storage).
+  - AI runtime panel, queue telemetry, DB telemetry.
+  - Camera network monitoring table.
+  - Incident timeline + auto-refresh telemetry.
+- Global header health indicators for System/AI/Cameras/Database.
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Tailwind CSS, Lucide React, Socket.IO Client.
-- **Backend**: Node.js, Express, Prisma (PostgreSQL), Redis (Queue/Pub-Sub), Multer.
-- **AI Service**: Python, FastAPI, OpenCV, Ultralytics (YOLOv8), Redis.
-- **Database**: PostgreSQL (Prisma ORM).
-- **Deployment**: Docker & Docker Compose.
+- Frontend: React, TypeScript, Tailwind CSS, Socket.IO Client, Recharts, Lucide.
+- Backend: Node.js, Express, Prisma ORM, PostgreSQL, Redis, Socket.IO.
+- AI Service: Python, FastAPI, OpenCV, Ultralytics YOLOv8, EasyOCR.
+- Infra: Docker, Docker Compose.
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Docker & Docker Compose
-- Node.js (v18+) - optional for local dev
-- Python (3.10+) - optional for local AI dev
+- Docker + Docker Compose
 
-### Setup and Installation
+### Run
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/[your-repo]/Smart-Traffic-Violation-Detection-System.git
-   cd Smart-Traffic-Violation-Detection-System
-   ```
+```bash
+docker compose up --build
+```
 
-2. **Run with Docker (Recommended)**
-   ```bash
-   docker-compose up --build
-   ```
+### Access
 
-3. **Default Credentials**
-   - **URL**: `http://localhost:3000`
-   - **Admin Email**: `admin@neonguardian.com`
-   - **Admin Password**: `admin123`
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:5000/api`
+- AI Service: `http://localhost:8000`
 
-## AI Training Pipeline
+### Default Admin Login
 
-To train the model on your own data:
-1. Place raw images and labels in `ai-training/datasets/raw/`.
-2. Run the preparation script: `python ai-training/scripts/prepare_dataset.py`.
-3. Start training: `python ai-training/scripts/train_model.py`.
-4. Validate and Export: `python ai-training/scripts/validate_model.py` and `python ai-training/scripts/export_model.py`.
+- Email: `admin@neonguardian.com`
+- Password: `admin123`
+
+## Patch Notes Data Seeding
+
+To (re)seed system update history:
+
+```bash
+cd backend
+npx ts-node prisma/seedUpdates.ts
+```
+
+To publish updates incrementally into an existing DB:
+
+```bash
+cd backend
+npx ts-node scripts/publish_v1_6.ts
+```
+
+The publisher now includes the latest update stream through **v1.7.0**.
 
 ## License
 
-Enterprise Licensed for Smart Traffic Management.
+Enterprise licensed for smart traffic management.

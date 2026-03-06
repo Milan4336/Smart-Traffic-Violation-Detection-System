@@ -15,6 +15,8 @@ build/
 # Project Specific
 uploads/videos/*
 uploads/evidence/*
+uploads/live/*
+uploads/snapshots/*
 !uploads/videos/.gitkeep
 !uploads/evidence/.gitkeep
 

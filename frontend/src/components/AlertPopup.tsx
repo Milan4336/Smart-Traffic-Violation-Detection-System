@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, X, Bell, ShieldAlert, CheckCircle } from 'lucide-react';
+import { AlertTriangle, X, ShieldAlert } from 'lucide-react';
 import clsx from 'clsx';
 
 interface AlertPopupProps {
@@ -14,8 +14,9 @@ export const AlertPopup: React.FC<AlertPopupProps> = ({ alert, onClose, onAcknow
     useEffect(() => {
         // Play alert sound if critical
         if (alert.alertType === 'CRITICAL') {
-            const audio = new Audio('/alert.mp3');
-            audio.play().catch(e => console.log("Audio play failed, user interaction may be required"));
+            const audioPath = alert.reason === 'BLACKLISTED_VEHICLE_DETECTED' ? '/blacklist_alert.mp3' : '/alert.mp3';
+            const audio = new Audio(audioPath);
+            audio.play().catch(() => console.log("Audio play failed, user interaction may be required"));
         }
 
         const timer = setInterval(() => {
@@ -63,6 +64,12 @@ export const AlertPopup: React.FC<AlertPopupProps> = ({ alert, onClose, onAcknow
                 </div>
 
                 <div className="space-y-2 mb-4 font-mono text-xs">
+                    {alert.reason === 'BLACKLISTED_VEHICLE_DETECTED' && (
+                        <div className="flex justify-between border-b border-alert/20 pb-1 bg-alert/10 px-1 -mx-1">
+                            <span className="text-alert font-bold">REASON:</span>
+                            <span className="text-alert font-black uppercase shadow-[0_0_10px_rgba(255,51,102,0.8)] animate-pulse">BLACKLISTED</span>
+                        </div>
+                    )}
                     <div className="flex justify-between border-b border-white/5 pb-1">
                         <span className="text-slate-400">PLATE:</span>
                         <span className="text-white font-bold">{alert.plateNumber}</span>

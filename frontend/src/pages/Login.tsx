@@ -45,7 +45,7 @@ export const Login: React.FC = () => {
             if (res.ok) {
                 setAuthStep(4);
                 await new Promise(r => setTimeout(r, 1000));
-                login(data.token);
+                login(data.token, data.user);
                 navigate('/');
             } else {
                 setIsAuthenticating(false);

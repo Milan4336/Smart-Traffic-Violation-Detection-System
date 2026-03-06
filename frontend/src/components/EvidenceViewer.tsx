@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { X, Play, Pause, SkipForward, SkipBack, Image as ImageIcon, Video, Target, Info, MapPin, Calendar, Clock, DollarSign, ShieldAlert } from 'lucide-react';
+import { X, Play, Pause, SkipForward, SkipBack, Image as ImageIcon, Video, Target, Info, MapPin, Calendar, DollarSign, ShieldAlert, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 import clsx from 'clsx';
 import { Button } from './ui/Button';
+import { useAuth } from '../contexts/AuthContext';
 
 interface EvidenceViewerProps {
     violationId: string;
@@ -10,8 +11,11 @@ interface EvidenceViewerProps {
 }
 
 export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onClose }) => {
+    const { isAdmin, isOfficer } = useAuth();
     const [evidence, setEvidence] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [reviewNotes, setReviewNotes] = useState('');
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -32,6 +36,9 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onC
                 });
                 setEvidence(res.data);
                 setCurrentTime(res.data.timestampSeconds || 0);
+                if (res.data.metadata.reviewNotes) {
+                    setReviewNotes(res.data.metadata.reviewNotes);
+                }
             } catch (err) {
                 console.error("Failed to fetch evidence", err);
             } finally {
@@ -90,6 +97,49 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onC
         }
     };
 
+    const handleReview = async (decision: 'APPROVED' | 'REJECTED') => {
+        if (!window.confirm(`Are you sure you want to ${decision} this violation?`)) return;
+
+        setSubmitting(true);
+        try {
+            await axios.post(`${apiUrl}/violations/${violationId}/review`, {
+                decision,
+                notes: reviewNotes
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            onClose();
+        } catch (err) {
+            console.error("Failed to submit review", err);
+            alert("Failed to submit review. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDownloadReport = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/violations/${violationId}/report`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                throw new Error('Report download failed');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `violation_report_${violationId}.pdf`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        } catch {
+            alert('Failed to download report');
+        }
+    };
+
     if (loading) return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md">
             <div className="text-primary animate-pulse font-mono uppercase tracking-widest">Initialising Forensic Matrix...</div>
@@ -118,7 +168,7 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onC
 
                 <div className="flex-1 flex flex-col md:flex-row min-h-0">
                     {/* Left: Metadata Panel */}
-                    <aside className="w-full md:w-72 border-r border-white/10 p-6 flex flex-col gap-6 bg-black/40 overflow-y-auto">
+                    <aside className="w-full md:w-80 border-r border-white/10 p-6 flex flex-col gap-6 bg-black/40 overflow-y-auto">
                         <section>
                             <h3 className="text-[10px] font-display font-bold text-primary mb-4 tracking-[0.2em] uppercase border-b border-primary/20 pb-1">Primary Intel</h3>
                             <div className="space-y-4">
@@ -141,10 +191,6 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onC
                             <h3 className="text-[10px] font-display font-bold text-primary mb-4 tracking-[0.2em] uppercase border-b border-primary/20 pb-1">Geospatial / Temporal</h3>
                             <div className="space-y-3 font-mono text-[10px]">
                                 <div className="flex items-center gap-2 text-slate-300">
-                                    <Camera size={12} className="text-primary" />
-                                    <span>{evidence.metadata.cameraName}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-slate-300">
                                     <MapPin size={12} className="text-primary" />
                                     <span>{evidence.metadata.location.lat?.toFixed(4)}, {evidence.metadata.location.lng?.toFixed(4)}</span>
                                 </div>
@@ -152,18 +198,72 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onC
                                     <Calendar size={12} className="text-primary" />
                                     <span>{new Date(evidence.metadata.time).toLocaleDateString()}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-slate-300">
-                                    <Clock size={12} className="text-primary" />
-                                    <span>{new Date(evidence.metadata.time).toLocaleTimeString()}</span>
-                                </div>
                             </div>
+                        </section>
+
+                        {/* Review Protocol HUD */}
+                        <section className="mt-4 border-t border-white/10 pt-4">
+                            <h3 className="text-[10px] font-display font-bold text-primary mb-4 tracking-[0.2em] uppercase border-b border-primary/20 pb-1">Review Protocol</h3>
+
+                            {evidence.metadata.reviewStatus === 'UNDER_REVIEW' && (isAdmin || isOfficer) ? (
+                                <div className="space-y-4">
+                                    <textarea
+                                        placeholder="ASSESSMENT NOTES (OPTIONAL)..."
+                                        value={reviewNotes}
+                                        onChange={(e) => setReviewNotes(e.target.value)}
+                                        className="w-full bg-black/60 border border-white/10 rounded p-3 text-[10px] text-white focus:outline-none focus:border-primary/40 min-h-[80px] uppercase font-mono"
+                                    />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button
+                                            variant="alert"
+                                            className="font-bold text-[10px] h-10"
+                                            onClick={() => handleReview('REJECTED')}
+                                            disabled={submitting}
+                                        >
+                                            <X size={14} className="mr-1" /> REJECT
+                                        </Button>
+                                        <Button
+                                            variant="primary"
+                                            className="font-bold text-[10px] h-10"
+                                            onClick={() => handleReview('APPROVED')}
+                                            disabled={submitting}
+                                        >
+                                            <ShieldCheck size={14} className="mr-1" /> APPROVE
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-3 text-[10px]">
+                                    <div className={clsx(
+                                        "p-3 rounded border font-mono font-bold text-center uppercase tracking-widest",
+                                        evidence.metadata.reviewStatus === 'APPROVED' ? "bg-success/20 text-success border-success/30" :
+                                            evidence.metadata.reviewStatus === 'REJECTED' ? "bg-alert/20 text-alert border-alert/30" :
+                                                "bg-warning/20 text-warning border-warning/30"
+                                    )}>
+                                        STATUS: {evidence.metadata.reviewStatus || 'PENDING'}
+                                    </div>
+                                    {evidence.metadata.reviewNotes && (
+                                        <div className="p-3 bg-white/5 rounded border border-white/5">
+                                            <label className="text-[8px] text-slate-500 uppercase block mb-1">Assessor Notes</label>
+                                            <p className="text-slate-300 font-mono italic">"{evidence.metadata.reviewNotes}"</p>
+                                        </div>
+                                    )}
+                                    {evidence.metadata.reviewedBy && (
+                                        <div className="text-[9px] text-slate-500 font-mono mt-2">
+                                            ASSESSED BY ID: {evidence.metadata.reviewedBy.slice(0, 8)}
+                                            <br />
+                                            TIMESTAMP: {new Date(evidence.metadata.reviewedAt).toLocaleString()}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </section>
 
                         <section className="mt-auto">
                             <div className="bg-alert/10 border border-alert/30 p-4 rounded-lg">
                                 <div className="flex items-center gap-2 text-alert mb-2">
                                     <DollarSign size={16} />
-                                    <span className="font-display font-bold text-sm">ENFORCEMENT FINE</span>
+                                    <span className="font-display font-bold text-sm uppercase">Levy Fine</span>
                                 </div>
                                 <div className="text-2xl font-mono font-black text-white">₹{evidence.metadata.fineAmount?.toLocaleString() || '0'}</div>
                             </div>
@@ -252,13 +352,13 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onC
                                     {/* HUD Buttons */}
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="icon" onClick={() => handleFrameStep('backward')} className="bg-white/5 hover:bg-white/10">
+                                            <Button variant="outline" size="sm" onClick={() => handleFrameStep('backward')} className="bg-white/5 hover:bg-white/10">
                                                 <SkipBack size={16} />
                                             </Button>
-                                            <Button variant="primary" size="icon" onClick={handlePlayPause} className="size-12 rounded-full">
+                                            <Button variant="primary" size="sm" onClick={handlePlayPause} className="size-12 rounded-full">
                                                 {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
                                             </Button>
-                                            <Button variant="outline" size="icon" onClick={() => handleFrameStep('forward')} className="bg-white/5 hover:bg-white/10">
+                                            <Button variant="outline" size="sm" onClick={() => handleFrameStep('forward')} className="bg-white/5 hover:bg-white/10">
                                                 <SkipForward size={16} />
                                             </Button>
                                         </div>
@@ -286,9 +386,14 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({ violationId, onC
                                         <Info size={14} className="text-primary" />
                                         <span>Bounding box rendered from AI detection matrix. Target tracking coordinates: [{evidence.boundingBox?.join(', ')}]</span>
                                     </div>
-                                    <Button variant="primary" size="sm" className="text-[10px] font-bold" onClick={() => window.open(`${baseUrl}${evidence.imageUrl}`, '_blank')}>
-                                        DOWNLOAD FRAME
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button variant="outline" size="sm" className="text-[10px] font-bold" onClick={handleDownloadReport}>
+                                            DOWNLOAD REPORT
+                                        </Button>
+                                        <Button variant="primary" size="sm" className="text-[10px] font-bold" onClick={() => window.open(`${baseUrl}${evidence.imageUrl}`, '_blank')}>
+                                            DOWNLOAD FRAME
+                                        </Button>
+                                    </div>
                                 </div>
                             )}
                         </div>
